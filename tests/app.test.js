@@ -1,7 +1,12 @@
-import app from '../src/app';
-import supertest from 'supertest';
-import { expect, test } from 'jest';
+/* eslint-disable no-undef */
 
-test('expect it to work', () => {
-  expect(() => 2 + 2).toBe(4);
+import request from 'supertest';
+import app from '../src/app';
+
+describe('GET /', () => {
+  test('responds with status 200', (done) => {
+    request(app)
+      .get('/')
+      .expect(200, done);
+  });
 });
