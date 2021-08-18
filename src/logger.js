@@ -36,7 +36,7 @@ const fileFormat = combine(
   timestamp({ format: 'YYY-MM-DD HH:mm:ss:ms' }),
   printf((info) => `${info.timestamp} ${info.level}: ${info.message}`)
 );
-const transports = env === 'production'
+const transports = env !== 'development'
   ? [new winston.transports.File({
     filename: './logs.log',
     format: fileFormat,
