@@ -5,6 +5,7 @@ const morganMiddleware = morgan(
   'tiny',
   {
     stream: {
+      // slice() is there to remove newline at the end of each morgan log
       write: (info) => logger.http(info.slice(0, -1))
     }
   }

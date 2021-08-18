@@ -1,5 +1,6 @@
 import express from 'express';
 import morganMiddleware from './loggingMiddleware/morgan';
+import logger from './loggingMiddleware/logger';
 
 const app = express();
 
@@ -11,5 +12,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log('Listening on port ' + PORT);
+  logger.info(`Listening on port ${PORT}`);
 });
