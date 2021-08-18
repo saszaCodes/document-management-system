@@ -44,7 +44,7 @@ const transports = env !== 'development'
   : [
     new winston.transports.Console({ format: consoleFormat }),
     new winston.transports.File({
-      filename: './logs.log',
+      filename: './logsDev.log',
       format: fileFormat,
     })
   ];
