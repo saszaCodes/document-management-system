@@ -6,8 +6,8 @@
  * @param {Object} res is expected to be an an object with info about the response
  * @returns {null}.
  */
-function genericError(err, req, res) {
+function generic(err, req, res) {
   res.sendStatus(500);
 }
 
-export default { genericError };
+export default generic;

@@ -1,11 +1,14 @@
 import express from 'express';
-import morganMiddleware from './loggingMiddleware/morgan';
-import errorHandler from './errorHandler';
+import { errorHandlers, logging } from './middleware';
+// import middleware from './middleware';
 
+// const { errorHandlers } = middleware;
+// console.log(errorHandlers);
 const app = express();
-const { genericError } = errorHandler;
+const { generic } = errorHandlers;
+const { requestLogger } = logging;
 
-app.use(morganMiddleware);
+app.use(requestLogger);
 app.get('/', (req, res) => {
   res.send('This is my first Express server');
 });
@@ -15,7 +18,7 @@ app.use('/', (err, req, res, next) => {
   if (res.headersSent) {
     next(err);
   } else {
-    genericError(err, req, res);
+    generic(err, req, res);
   }
 });
 

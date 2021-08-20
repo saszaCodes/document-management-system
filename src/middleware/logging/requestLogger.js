@@ -1,7 +1,7 @@
 import morgan from 'morgan';
-import logger from './logger';
+import { logger } from '../../lib';
 
-const morganMiddleware = morgan(
+const requestLogger = morgan(
   'tiny',
   {
     stream: {
@@ -11,4 +11,4 @@ const morganMiddleware = morgan(
   }
 );
 
-export default morganMiddleware;
+export default requestLogger;

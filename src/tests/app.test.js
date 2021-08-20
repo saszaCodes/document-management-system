@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../src/app';
+import app from '../app';
 
 describe('GET /', () => {
   test('responds with status 200', (done) => {
