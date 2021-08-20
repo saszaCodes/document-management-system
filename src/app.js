@@ -5,6 +5,8 @@ const app = express();
 const PORT = process.env.port || 3000;
 const { genericError } = errorHandler;
 
+const PORT = process.env.port || 3000;
+
 app.get('/', (req, res) => {
   res.send('This is my first Express server');
 });
