@@ -1,8 +1,8 @@
 import express from 'express';
+import morganMiddleware from './loggingMiddleware/morgan';
 import errorHandler from './errorHandler';
 
 const app = express();
-const PORT = process.env.port || 3000;
 const { genericError } = errorHandler;
 
 app.use('/', (err, req, res, next) => {
@@ -15,6 +15,7 @@ app.use('/', (err, req, res, next) => {
   }
 });
 
+app.use(morganMiddleware);
 app.get('/', (req, res) => {
   res.send('This is my first Express server');
 });
