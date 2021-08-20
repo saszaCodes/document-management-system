@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "npx nodemon --exec babel-node ./src/app.js",
+    "dev": "npx nodemon --exec babel-node ./src/server.js",
     "build": "npx babel src --out-dir build",
     "lint": "npx eslint ./",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npx jest tests/"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +25,8 @@
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.24.0",
-    "nodemon": "^2.0.12"
+    "jest": "^27.0.6",
+    "nodemon": "^2.0.12",
+    "supertest": "^6.1.5"
   }
 }
