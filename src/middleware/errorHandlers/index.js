@@ -1,6 +1,6 @@
 import generic from './generic';
 
-export const errorHandlers = {
+const errorHandlers = {
   generic,
 };
 
