@@ -1,9 +1,6 @@
 import express from 'express';
 import { errorHandlers, logging } from './middleware';
-// import middleware from './middleware';
 
-// const { errorHandlers } = middleware;
-// console.log(errorHandlers);
 const app = express();
 const { generic } = errorHandlers;
 const { requestLogger } = logging;
