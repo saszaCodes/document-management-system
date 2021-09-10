@@ -14,9 +14,6 @@ const levels = {
   http: 3,
   debug: 4,
 };
-/** function evaluating which level of logging is to be used.
- * @returns {String} - a level name
- */
 const level = env === 'development' ? 'debug' : 'warn';
 const colors = {
   error: 'red',
