@@ -31,5 +31,13 @@
                 "ClassDeclaration": true
             }
         }]
-    }
+    },
+    "overrides": [
+        {
+            "files": ["src/lib/knex/migrations/*.js"],
+            "rules": {
+                "require-jsdoc": "off"
+            }
+        }
+    ]
 }
