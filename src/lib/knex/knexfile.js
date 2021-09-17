@@ -1,3 +1,8 @@
+import dotenv from 'dotenv';
+
+// specify path to .env file with environment variables
+dotenv.config({ path: '../../../.env' });
+// extract variables from process.env
 const {
   KNEX_CLIENT,
   DB_URL,
