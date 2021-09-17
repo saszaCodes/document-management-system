@@ -10,7 +10,8 @@
     "test": "npx jest tests/",
     "knex": "npx knex --knexfile=./src/lib/knex/knexfile.js --esm",
     "migrate:latest": "npx knex --knexfile=./src/lib/knex/knexfile.js --esm  migrate:latest",
-    "migrate:rollback": "npx knex --knexfile=./src/lib/knex/knexfile.js --esm  migrate:rollback"
+    "migrate:rollback": "npx knex --knexfile=./src/lib/knex/knexfile.js --esm  migrate:rollback",
+    "seed": "npm run knex seed:run"
   },
   "keywords": [],
   "author": "",

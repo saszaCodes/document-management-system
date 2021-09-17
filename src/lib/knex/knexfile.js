@@ -10,4 +10,7 @@ export default {
     tableName: 'knex_migrations',
     directory: './migrations'
   },
+  seeds: {
+    directory: './seeds'
+  }
 };
