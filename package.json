@@ -7,7 +7,10 @@
     "dev": "npx nodemon --exec babel-node ./src/server.js",
     "build": "npx babel src --out-dir build",
     "lint": "npx eslint ./",
-    "test": "npx jest tests/"
+    "test": "npx jest tests/",
+    "knex": "npx knex --knexfile=./src/lib/knex/knexfile.js --esm",
+    "migrate:latest": "npx knex --knexfile=./src/lib/knex/knexfile.js --esm  migrate:latest",
+    "migrate:rollback": "npx knex --knexfile=./src/lib/knex/knexfile.js --esm  migrate:rollback"
   },
   "keywords": [],
   "author": "",
