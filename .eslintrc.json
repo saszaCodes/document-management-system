@@ -34,7 +34,7 @@
     },
     "overrides": [
         {
-            "files": ["src/lib/knex/migrations/*.js"],
+            "files": ["src/lib/knex/migrations/*.js", "src/lib/knex/seeds/*.js"],
             "rules": {
                 "require-jsdoc": "off"
             }
