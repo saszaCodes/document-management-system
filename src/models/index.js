@@ -1,3 +1,3 @@
-import { userProfiles, documents } from './dms';
+import { userProfiles, documents, userLogins } from './dms';
 
-export { userProfiles, documents };
+export { userProfiles, documents, userLogins };

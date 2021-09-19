@@ -1,8 +1,8 @@
 /* eslint-disable brace-style */
-import { userProfiles, documents } from '../models';
+import { userProfiles, documents, userLogins } from '../models';
 
 export const userProfilesService = {
-  createUser: async (req, res, next) => {
+  createProfile: async (req, res, next) => {
     const { email, fullname } = req.body;
     // email is required, if it is not supplied, send 400 Bad Request status
     if (!email) {
@@ -135,9 +135,61 @@ export const documentsService = {
       res.status(400).send(`Document with id ${id} doesn't exist.`);
       return;
     }
-    await userProfiles
+    await documents
       .deleteDocument(id)
       .catch((err) => { next(err); });
     res.status(200).send('Document successfully deleted.');
+  }
+};
+
+export const userLoginsService = {
+  createLogin: async (req, res, next) => {
+    const { username, password } = req.body;
+    // username and password are required, if they are not supplied,
+    // send 400 Bad Request status
+    if (!username || !password) {
+      res.status(400).send('Invalid request. Username and password need to be supplied');
+      return;
+    }
+    // if login is successfully created, send its id and username
+    const login = await userLogins
+      .addLogin(username, password)
+      .catch((err) => { next(err); });
+    res.status(200).send(login);
+  },
+  updateLogin: async (req, res, next) => {
+    const { updateValues } = req.body;
+    // if no update values are supplied in request, or their type is other than object
+    // return 400 Bad Request status
+    if (!updateValues || typeof updateValues !== 'object') {
+      res.status(400).send('Invalid request');
+      return;
+    }
+    const updateKeys = Object.keys(updateValues);
+    // if any other update values than 'username' or 'password' are supplied in request,
+    // return 400 Bad Request status
+    if (updateKeys.some((el) => el !== 'username' && el !== 'password')) {
+      res.status(400).send('Invalid request');
+      return;
+    }
+    const updatedColumns = await userLogins
+      .updateLogin(req.params.id, updateValues)
+      .catch((err) => { next(err); });
+    res.status(200).send(updatedColumns);
+  },
+  deleteLogin: async (req, res, next) => {
+    const { id } = req.params;
+    // if login doesn't exist, send 400 Bad Request status
+    const login = await userLogins
+      .getLoginById(id)
+      .catch((err) => { next(err); });
+    if (login.length === 0) {
+      res.status(400).send(`Login with id ${id} doesn't exist.`);
+      return;
+    }
+    await userLogins
+      .deleteLogin(id)
+      .catch((err) => { next(err); });
+    res.status(200).send('Login successfully deleted.');
   }
 };

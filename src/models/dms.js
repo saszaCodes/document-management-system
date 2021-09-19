@@ -96,5 +96,29 @@ class DocumentsClass extends CRUD {
   }
 }
 
+class UserLoginsClass extends CRUD {
+  addLogin(username, password) {
+    if (!username || !password) {
+      throw new Error('username and password are required in function addLogin()');
+    }
+    return this.createEntry({ username, password }, ['id', 'username']);
+  }
+  getLoginById(id) {
+    return this.getEntry({ id }, ['id', 'username']);
+  }
+  updateLogin(id, updateValues) {
+    return this.updateEntry({ id }, updateValues, ['id', 'username']);
+  }
+  deleteLogin(id) {
+    return this.deleteEntry({ id });
+  }
+  async checkCredentials(username, password) {
+    const credentials = await this.getEntry({ username, password }, ['username'])
+      .catch((err) => { throw err; });
+    return credentials.length > 0;
+  }
+}
+
 export const userProfiles = new UserProfilesClass('user_profiles');
 export const documents = new DocumentsClass('documents');
+export const userLogins = new UserLoginsClass('user_logins');
