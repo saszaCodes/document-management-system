@@ -21,7 +21,6 @@ class CRUD {
       .catch((err) => { throw err; });
     return data;
   }
-  // TODO: should allow multiple conditions, not only key-value. Update name afted changing
   async getEntry(conditions, columns) {
     const data = await db
       .select(...columns)
@@ -76,4 +75,26 @@ class UserProfilesClass extends CRUD {
   }
 }
 
+class DocumentsClass extends CRUD {
+  addDocument(title, body) {
+    if (!title) {
+      throw new Error('title is required in function addDocument()');
+    }
+    return this.createEntry({ title, body }, ['id', 'title', 'body', 'author_id']);
+  }
+  getDocumentById(id) {
+    return this.getEntry({ id }, ['id', 'title', 'body', 'author_id']);
+  }
+  getDocumentsByTitle(title) {
+    return this.getEntry({ title }, ['id', 'title', 'body', 'author_id']);
+  }
+  updateDocument(id, updateValues) {
+    return this.updateEntry({ id }, updateValues, ['id', 'title', 'body', 'author_id']);
+  }
+  deleteDocument(id) {
+    return this.deleteEntry({ id });
+  }
+}
+
 export const userProfiles = new UserProfilesClass('user_profiles');
+export const documents = new DocumentsClass('documents');

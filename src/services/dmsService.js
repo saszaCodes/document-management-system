@@ -1,5 +1,5 @@
 /* eslint-disable brace-style */
-import { userProfiles } from '../models';
+import { userProfiles, documents } from '../models';
 
 export const userProfilesService = {
   createUser: async (req, res, next) => {
@@ -63,7 +63,7 @@ export const userProfilesService = {
       }
     }
     const updatedColumns = await userProfiles
-      .updateProfile(req.params.id, req.body.updateValues)
+      .updateProfile(req.params.id, updateValues)
       .catch((err) => { next(err); });
     res.status(200).send(updatedColumns);
   },
@@ -81,5 +81,63 @@ export const userProfilesService = {
       .deleteProfile(id)
       .catch((err) => { next(err); });
     res.status(200).send('User successfully deleted.');
+  }
+};
+
+export const documentsService = {
+  createDocument: async (req, res, next) => {
+    const { title, body } = req.body;
+    // title is required, if it is not supplied, send 400 Bad Request status
+    if (!title) {
+      res.status(400).send('Invalid request. Title needs to be supplied');
+      return;
+    }
+    // if document is successfully created, send its id, title and body
+    const doc = await documents
+      .addDocument(title, body)
+      .catch((err) => { next(err); });
+    res.status(200).send(doc);
+  },
+  fetchDocument: async (req, res, next) => {
+    const doc = await documents
+      .getDocumentById(req.params.id)
+      .catch((err) => { next(err); });
+    if (doc.length === 0) { res.status(404).send('Document not found.'); }
+    else { res.status(200).send(doc); }
+  },
+  updateDocument: async (req, res, next) => {
+    const { updateValues } = req.body;
+    // if no update values are supplied in request, or their type is other than object
+    // return 400 Bad Request status
+    if (!updateValues || typeof updateValues !== 'object') {
+      res.status(400).send('Invalid request');
+      return;
+    }
+    const updateKeys = Object.keys(updateValues);
+    // if any other update values than 'title' or 'body' are supplied in request,
+    // return 400 Bad Request status
+    if (updateKeys.some((el) => el !== 'title' && el !== 'body')) {
+      res.status(400).send('Invalid request');
+      return;
+    }
+    const updatedColumns = await documents
+      .updateDocument(req.params.id, updateValues)
+      .catch((err) => { next(err); });
+    res.status(200).send(updatedColumns);
+  },
+  deleteDocument: async (req, res, next) => {
+    const { id } = req.params;
+    // if document doesn't exist, send 400 Bad Request status
+    const doc = await documents
+      .getDocumentById(id)
+      .catch((err) => { next(err); });
+    if (doc.length === 0) {
+      res.status(400).send(`Document with id ${id} doesn't exist.`);
+      return;
+    }
+    await userProfiles
+      .deleteDocument(id)
+      .catch((err) => { next(err); });
+    res.status(200).send('Document successfully deleted.');
   }
 };
