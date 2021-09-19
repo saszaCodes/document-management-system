@@ -1,6 +1,6 @@
 import express from 'express';
 import { errorHandlers, logging } from './middleware';
-import { userRouter } from './routes';
+import { usersRouter } from './routes';
 
 const app = express();
 const { generic } = errorHandlers;
@@ -12,7 +12,7 @@ app.use(express.urlencoded({ extended: true })); // for parsing application/x-ww
 app.get('/', (req, res) => {
   res.send('This is my first Express server');
 });
-app.use(userRouter);
+app.use(usersRouter);
 app.use('/', (err, req, res, next) => {
   // if response has already started streaming and error occurs, pass it to Express
   // default error handler - it will close the connection and fail the request.

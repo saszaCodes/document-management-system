@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 /* eslint-disable require-jsdoc */
 /* eslint-disable lines-between-class-members */
 /* eslint-disable class-methods-use-this */
@@ -7,10 +8,11 @@ class CRUD {
   constructor(table) {
     this.table = table;
   }
-  async createEntry(data) {
-    await db(this.table)
-      .insert(data)
+  async createEntry(data, returnColumns) {
+    const entry = await db(this.table)
+      .insert(data, returnColumns)
       .catch((err) => { throw err; });
+    return entry;
   }
   async getAll(columns) {
     const data = await db
@@ -20,10 +22,10 @@ class CRUD {
     return data;
   }
   // TODO: should allow multiple conditions, not only key-value. Update name afted changing
-  async getByKey(key, value, columns) {
+  async getEntry(conditions, columns) {
     const data = await db
       .select(...columns)
-      .where(key, value)
+      .where(conditions)
       .from(this.table)
       .catch((err) => { throw err; });
     return data;
@@ -49,8 +51,29 @@ class CRUD {
       .catch((err) => { throw err; });
   }
 }
+/** contains methods for CRUD operations in user_profiles table */
+class UserProfilesClass extends CRUD {
+  addProfile(email, fullname) {
+    if (!email) {
+      throw new Error('email is required in function addUser()');
+    }
+    return this.createEntry({ email, fullname }, ['id', 'email', 'fullname']);
+  }
+  getAllProfiles() {
+    return this.getAll(['id', 'email', 'fullname']);
+  }
+  getProfileById(id) {
+    return this.getEntry({ id }, ['id', 'email', 'fullname']);
+  }
+  getProfileByEmail(email) {
+    return this.getEntry({ email }, ['id', 'email', 'fullname']);
+  }
+  updateProfile(id, updateValues) {
+    return this.updateEntry({ id }, updateValues, ['id', 'email', 'fullname']);
+  }
+  deleteProfile(id) {
+    return this.deleteEntry({ id });
+  }
+}
 
-/** contains methods responsible for CRUD operations in users table */
-const user = new CRUD('user_profiles');
-
-export { user };
+export const userProfiles = new UserProfilesClass('user_profiles');
