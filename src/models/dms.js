@@ -70,11 +70,16 @@ class UserProfilesClass extends CRUD {
   checkIfProfileExists(conditions) {
     return this.checkIfEntryExists(conditions);
   }
-  addProfile(email, fullname) {
-    if (!email) {
-      throw new Error('email is required in function addUser()');
+  addProfile(email, fullname, username, password) {
+    if (!email || !username || !password) {
+      throw new Error('email, username and password are required in function addUser()');
     }
-    return this.createEntry({ email, fullname }, ['id', 'email', 'fullname', 'username']);
+    return this.createEntry({
+      email,
+      fullname,
+      username,
+      password
+    }, ['id', 'email', 'fullname', 'username']);
   }
   getActiveProfiles() {
     return this.getEntry({ deleted_at: null }, ['id', 'email', 'fullname', 'username']);
@@ -94,11 +99,11 @@ class DocumentsClass extends CRUD {
   checkIfDocumentExists(conditions) {
     return this.checkIfEntryExists(conditions);
   }
-  addDocument(title, body) {
-    if (!title) {
-      throw new Error('title is required in function addDocument()');
+  addDocument(title, body, authorId) {
+    if (!title || !authorId) {
+      throw new Error('title and authorId are required in function addDocument()');
     }
-    return this.createEntry({ title, body }, ['id', 'title', 'body', 'author_id']);
+    return this.createEntry({ title, body, author_id: authorId }, ['id', 'title', 'body', 'author_id']);
   }
   getDocumentById(id) {
     return this.getEntry({ id }, ['id', 'title', 'body', 'author_id']);
@@ -115,6 +120,12 @@ class DocumentsClass extends CRUD {
 }
 
 class UserLoginsClass extends CRUD {
+  addLogin(userId) {
+    if (!userId) {
+      throw new Error('title is required in function addLogin()');
+    }
+    return this.createEntry({ user_profile_id: userId }, []);
+  }
   logIn(userId, timestamp) {
     return this.updateEntry({ user_profile_id: userId }, { last_login: timestamp });
   }

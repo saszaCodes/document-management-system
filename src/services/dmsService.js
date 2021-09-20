@@ -33,10 +33,16 @@ export const userProfilesService = {
       res.status(400).send('Username already used.');
       return;
     }
-    // if user is successfully created, send their email, fullname and id
+    // create entry in user_profiles table;
     const profile = await userProfiles
       .addProfile(email, fullname, username, password)
       .catch((err) => { next(err); });
+    // create entry in user_logins table
+    const profileId = profile[0].id;
+    await userLogins
+      .addLogin(profileId)
+      .catch((err) => { next(err); });
+    // if user is successfully created, send their email, fullname and id
     res.status(200).send(profile);
   },
   fetchActiveProfiles: async (req, res, next) => {
@@ -132,14 +138,24 @@ export const userProfilesService = {
 export const documentsService = {
   createDocument: async (req, res, next) => {
     const { title, body } = req.body;
-    // title is required, if it is not supplied, send 400 Bad Request status
-    if (!title) {
-      res.status(400).send('Invalid request. Title needs to be supplied');
+    const authorId = req.body.author_id;
+    // title and authorId are required, if it is not supplied, send 400 Bad Request status
+    if (!title || !authorId) {
+      res.status(400).send('Invalid request. Title and author_id need to be supplied');
+      return;
+    }
+    // if authorId doesn't match existing user,
+    // send 400 Bad Request
+    const validId = await userProfiles
+      .checkIfProfileExists({ id: authorId })
+      .catch((err) => { next(err); });
+    if (!validId) {
+      res.status(400).send(`Invalid request. User with id ${authorId} doesn't exist.`);
       return;
     }
     // if document is successfully created, send its id, title and body
     const doc = await documents
-      .addDocument(title, body)
+      .addDocument(title, body, authorId)
       .catch((err) => { next(err); });
     res.status(200).send(doc);
   },
@@ -202,6 +218,12 @@ export const documentsService = {
 export const userLoginsService = {
   logIn: async (req, res, next) => {
     const { username, password } = req.body;
+    // username and password are required,
+    // if they are not supplied, send 400 Bad Request status
+    if (!password || !username) {
+      res.status(400).send('Invalid request. Username and password are required.');
+      return;
+    }
     // check if username and password match any user in user_profiles table
     // if not, send 400 status
     const userExists = await userProfiles
@@ -215,8 +237,10 @@ export const userLoginsService = {
     const userData = await userProfiles
       .getProfileByUsername(username)
       .catch((err) => { next(err); });
-    const userId = userData.id;
+    const userId = userData[0].id;
     // update last_login column in user_logins table
+    console.log(userId);
+    console.log(new Date(Date.now()).toUTCString());
     await userLogins
       .logIn(userId, new Date(Date.now()).toUTCString())
       .catch((err) => { next(err); });
