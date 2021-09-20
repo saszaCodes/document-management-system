@@ -9,9 +9,10 @@ export const userProfilesService = {
       username,
       password
     } = req.body;
-    // email is required, if it is not supplied, send 400 Bad Request status
+    // email, username and password are required,
+    // if they are not supplied, send 400 Bad Request status
     if (!email || !password || !username) {
-      res.status(400).send('Invalid request. New user\'s email needs to be supplied');
+      res.status(400).send('Invalid request. New user\'s email, username and password need to be supplied');
       return;
     }
     // emails need to be unique, if profile with supplied email already exists,
