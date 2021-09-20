@@ -3,24 +3,38 @@ import { userProfiles, documents, userLogins } from '../models';
 
 export const userProfilesService = {
   createProfile: async (req, res, next) => {
-    const { email, fullname } = req.body;
+    const {
+      email,
+      fullname,
+      username,
+      password
+    } = req.body;
     // email is required, if it is not supplied, send 400 Bad Request status
-    if (!email) {
+    if (!email || !password || !username) {
       res.status(400).send('Invalid request. New user\'s email needs to be supplied');
       return;
     }
     // emails need to be unique, if profile with supplied email already exists,
     // send 400 Bad Request status
-    const profileExists = await userProfiles
+    const emailExists = await userProfiles
       .checkIfProfileExists({ email })
       .catch((err) => { next(err); });
-    if (profileExists) {
-      res.status(400).send('User already exists.');
+    if (emailExists) {
+      res.status(400).send('Email already used.');
+      return;
+    }
+    // usernames need to be unique, if profile with supplied email already exists,
+    // send 400 Bad Request status
+    const usernameExists = await userProfiles
+      .checkIfProfileExists({ username })
+      .catch((err) => { next(err); });
+    if (usernameExists) {
+      res.status(400).send('Username already used.');
       return;
     }
     // if user is successfully created, send their email, fullname and id
     const profile = await userProfiles
-      .addProfile(email, fullname)
+      .addProfile(email, fullname, username, password)
       .catch((err) => { next(err); });
     res.status(200).send(profile);
   },
@@ -47,10 +61,15 @@ export const userProfilesService = {
     res.status(200).send(profile);
   },
   updateProfile: async (req, res, next) => {
-    const { email, fullname } = req.body;
+    const {
+      email,
+      fullname,
+      username,
+      password
+    } = req.body;
     const { id } = req.params;
     // if no update values are supplied in request, send 400 Bad Request status
-    if (!email && !fullname) {
+    if (!email && !fullname && !username && !password) {
       res.status(400).send('Invalid request');
       return;
     }
@@ -72,8 +91,23 @@ export const userProfilesService = {
         return;
       }
     }
+    // if user tries to change username to one that is already used, send 400 Bad Request status
+    if (username) {
+      const existingUser = await userProfiles
+        .checkIfProfileExists({ username })
+        .catch((err) => { next(err); });
+      if (existingUser) {
+        res.status(400).send('This username is already registered.');
+        return;
+      }
+    }
     const updatedColumns = await userProfiles
-      .updateProfile(id, { email, fullname })
+      .updateProfile(id, {
+        email,
+        fullname,
+        username,
+        password
+      })
       .catch((err) => { next(err); });
     res.status(200).send(updatedColumns);
   },

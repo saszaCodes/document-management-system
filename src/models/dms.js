@@ -74,16 +74,16 @@ class UserProfilesClass extends CRUD {
     if (!email) {
       throw new Error('email is required in function addUser()');
     }
-    return this.createEntry({ email, fullname }, ['id', 'email', 'fullname']);
+    return this.createEntry({ email, fullname }, ['id', 'email', 'fullname', 'username']);
   }
   getActiveProfiles() {
-    return this.getEntry({ deleted_at: null }, ['id', 'email', 'fullname']);
+    return this.getEntry({ deleted_at: null }, ['id', 'email', 'fullname', 'username']);
   }
   getProfileById(id) {
-    return this.getEntry({ id }, ['id', 'email', 'fullname']);
+    return this.getEntry({ id }, ['id', 'email', 'fullname', 'username']);
   }
   updateProfile(id, updateValues) {
-    return this.updateEntry({ id }, updateValues, ['id', 'email', 'fullname']);
+    return this.updateEntry({ id }, updateValues, ['id', 'email', 'fullname', 'username']);
   }
 }
 
