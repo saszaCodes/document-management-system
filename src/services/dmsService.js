@@ -54,12 +54,12 @@ export const userProfilesService = {
       res.status(400).send('Invalid request');
       return;
     }
-    // if profile doesn't exist, send 400 Bad Request status
+    // if profile doesn't exist, send 404 Not Found status
     const profileExists = await userProfiles
       .checkIfProfileExists({ id })
       .catch((err) => { next(err); });
     if (!profileExists) {
-      res.status(400).send('Profile doesn\'t exist.');
+      res.status(404).send('Profile doesn\'t exist.');
       return;
     }
     // if user tries to change email to one that is already used, send 400 Bad Request status
@@ -109,44 +109,56 @@ export const documentsService = {
     res.status(200).send(doc);
   },
   fetchDocument: async (req, res, next) => {
-    const doc = await documents
-      .getDocumentById(req.params.id)
+    const { id } = req.params;
+    // if document doesn't exist, send 404
+    const documentExists = await documents
+      .checkIfDocumentExists({ id })
       .catch((err) => { next(err); });
-    if (doc.length === 0) { res.status(404).send('Document not found.'); }
-    else { res.status(200).send(doc); }
+    if (!documentExists) {
+      res.status(404).send('Document not found.');
+      return;
+    }
+    // else, send the document
+    const doc = await documents
+      .getDocumentById(id)
+      .catch((err) => { next(err); });
+    res.status(200).send(doc);
   },
   updateDocument: async (req, res, next) => {
-    const { updateValues } = req.body;
-    // if no update values are supplied in request, or their type is other than object
+    const { title, body } = req.body;
+    const { id } = req.params;
+    // if no update values are supplied in request,
     // return 400 Bad Request status
-    if (!updateValues || typeof updateValues !== 'object') {
-      res.status(400).send('Invalid request');
+    if (!title && !body) {
+      res.status(400).send('Invalid request.');
       return;
     }
-    const updateKeys = Object.keys(updateValues);
-    // if any other update values than 'title' or 'body' are supplied in request,
-    // return 400 Bad Request status
-    if (updateKeys.some((el) => el !== 'title' && el !== 'body')) {
-      res.status(400).send('Invalid request');
+    // if document doesn't exist, send 404 Not Found status
+    const documentExists = await documents
+      .checkIfDocumentExists({ id })
+      .catch((err) => { next(err); });
+    if (!documentExists) {
+      res.status(404).send('Document doesn\'t exist.');
       return;
     }
+    // else, send updated document data back
     const updatedColumns = await documents
-      .updateDocument(req.params.id, updateValues)
+      .updateDocument(id, { title, body })
       .catch((err) => { next(err); });
     res.status(200).send(updatedColumns);
   },
   deleteDocument: async (req, res, next) => {
     const { id } = req.params;
-    // if document doesn't exist, send 400 Bad Request status
-    const doc = await documents
-      .getDocumentById(id)
+    // if document doesn't exist, send 404 Not Found status
+    const documentExists = await documents
+      .checkIfDocumentExists({ id })
       .catch((err) => { next(err); });
-    if (doc.length === 0) {
-      res.status(400).send(`Document with id ${id} doesn't exist.`);
+    if (!documentExists) {
+      res.status(404).send('Document doesn\'t exist.');
       return;
     }
     await documents
-      .deleteDocument(id)
+      .updateDocument(id, { deleted_at: new Date(Date.now()).toUTCString() })
       .catch((err) => { next(err); });
     res.status(200).send('Document successfully deleted.');
   }

@@ -88,6 +88,9 @@ class UserProfilesClass extends CRUD {
 }
 
 class DocumentsClass extends CRUD {
+  checkIfDocumentExists(conditions) {
+    return this.checkIfEntryExists(conditions);
+  }
   addDocument(title, body) {
     if (!title) {
       throw new Error('title is required in function addDocument()');
