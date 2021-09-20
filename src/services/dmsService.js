@@ -239,8 +239,6 @@ export const userLoginsService = {
       .catch((err) => { next(err); });
     const userId = userData[0].id;
     // update last_login column in user_logins table
-    console.log(userId);
-    console.log(new Date(Date.now()).toUTCString());
     await userLogins
       .logIn(userId, new Date(Date.now()).toUTCString())
       .catch((err) => { next(err); });
