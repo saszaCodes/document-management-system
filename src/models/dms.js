@@ -82,6 +82,9 @@ class UserProfilesClass extends CRUD {
   getProfileById(id) {
     return this.getEntry({ id }, ['id', 'email', 'fullname', 'username']);
   }
+  getProfileByUsername(username) {
+    return this.getEntry({ username }, ['id', 'email', 'fullname', 'username']);
+  }
   updateProfile(id, updateValues) {
     return this.updateEntry({ id }, updateValues, ['id', 'email', 'fullname', 'username']);
   }
@@ -112,25 +115,8 @@ class DocumentsClass extends CRUD {
 }
 
 class UserLoginsClass extends CRUD {
-  addLogin(username, password) {
-    if (!username || !password) {
-      throw new Error('username and password are required in function addLogin()');
-    }
-    return this.createEntry({ username, password }, ['id', 'username']);
-  }
-  getLoginById(id) {
-    return this.getEntry({ id }, ['id', 'username']);
-  }
-  updateLogin(id, updateValues) {
-    return this.updateEntry({ id }, updateValues, ['id', 'username']);
-  }
-  deleteLogin(id) {
-    return this.deleteEntry({ id });
-  }
-  async checkCredentials(username, password) {
-    const credentials = await this.getEntry({ username, password }, ['username'])
-      .catch((err) => { throw err; });
-    return credentials.length > 0;
+  logIn(userId, timestamp) {
+    return this.updateEntry({ user_profile_id: userId }, { last_login: timestamp });
   }
 }
 

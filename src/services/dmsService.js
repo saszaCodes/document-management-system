@@ -199,53 +199,26 @@ export const documentsService = {
 };
 
 export const userLoginsService = {
-  createLogin: async (req, res, next) => {
+  logIn: async (req, res, next) => {
     const { username, password } = req.body;
-    // username and password are required, if they are not supplied,
-    // send 400 Bad Request status
-    if (!username || !password) {
-      res.status(400).send('Invalid request. Username and password need to be supplied');
-      return;
-    }
-    // if login is successfully created, send its id and username
-    const login = await userLogins
-      .addLogin(username, password)
+    // check if username and password match any user in user_profiles table
+    // if not, send 400 status
+    const userExists = await userProfiles
+      .checkIfProfileExists({ username, password })
       .catch((err) => { next(err); });
-    res.status(200).send(login);
-  },
-  updateLogin: async (req, res, next) => {
-    const { updateValues } = req.body;
-    // if no update values are supplied in request, or their type is other than object
-    // return 400 Bad Request status
-    if (!updateValues || typeof updateValues !== 'object') {
-      res.status(400).send('Invalid request');
+    if (!userExists) {
+      res.status(400).send('Authentication failed');
       return;
     }
-    const updateKeys = Object.keys(updateValues);
-    // if any other update values than 'username' or 'password' are supplied in request,
-    // return 400 Bad Request status
-    if (updateKeys.some((el) => el !== 'username' && el !== 'password')) {
-      res.status(400).send('Invalid request');
-      return;
-    }
-    const updatedColumns = await userLogins
-      .updateLogin(req.params.id, updateValues)
+    // get id of a user with supplied username
+    const userData = await userProfiles
+      .getProfileByUsername(username)
       .catch((err) => { next(err); });
-    res.status(200).send(updatedColumns);
-  },
-  deleteLogin: async (req, res, next) => {
-    const { id } = req.params;
-    // if login doesn't exist, send 400 Bad Request status
-    const login = await userLogins
-      .getLoginById(id)
-      .catch((err) => { next(err); });
-    if (login.length === 0) {
-      res.status(400).send(`Login with id ${id} doesn't exist.`);
-      return;
-    }
+    const userId = userData.id;
+    // update last_login column in user_logins table
     await userLogins
-      .deleteLogin(id)
+      .logIn(userId, new Date(Date.now()).toUTCString())
       .catch((err) => { next(err); });
-    res.status(200).send('Login successfully deleted.');
+    res.status(200).send('Authentication successful');
   }
 };
