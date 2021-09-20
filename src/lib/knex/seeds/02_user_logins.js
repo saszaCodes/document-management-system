@@ -4,8 +4,6 @@ const fakeData = [];
 const numberOfEntries = 200;
 for (let i = 0; i < numberOfEntries; i += 1) {
   const data = {
-    username: faker.internet.userName(),
-    password: faker.internet.password(),
     last_login: faker.datatype.datetime(),
   };
   fakeData.push(data);
