@@ -9,13 +9,13 @@ export const userProfilesService = {
       res.status(400).send('Invalid request. New user\'s email needs to be supplied');
       return;
     }
-    // emails need to be unique, if user with supplied email already exists,
+    // emails need to be unique, if profile with supplied email already exists,
     // send 400 Bad Request status
-    const existingUser = await userProfiles
-      .getProfileByEmail(email)
+    const profileExists = await userProfiles
+      .checkIfProfileExists({ email })
       .catch((err) => { next(err); });
-    if (existingUser.length > 0) {
-      res.status(400).send('Email already registered.');
+    if (profileExists) {
+      res.status(400).send('User already exists.');
       return;
     }
     // if user is successfully created, send their email, fullname and id
@@ -24,61 +24,71 @@ export const userProfilesService = {
       .catch((err) => { next(err); });
     res.status(200).send(profile);
   },
-  fetchAllProfiles: async (req, res, next) => {
+  fetchActiveProfiles: async (req, res, next) => {
     const profiles = await userProfiles
-      .getAllProfiles()
+      .getActiveProfiles()
       .catch((err) => { next(err); });
     res.status(200).send(profiles);
   },
   fetchProfile: async (req, res, next) => {
-    const profile = await userProfiles
-      .getProfileById(req.params.id)
+    // if profile doesn't exist, send 404
+    const { id } = req.params;
+    const profileExists = await userProfiles
+      .checkIfProfileExists({ id })
       .catch((err) => { next(err); });
-    if (profile.length === 0) { res.status(404).send('Profile not found.'); }
-    else { res.status(200).send(profile); }
+    if (!profileExists) {
+      res.status(404).send('Profile not found.');
+      return;
+    }
+    // else, send 200 with profile data
+    const profile = await userProfiles
+      .getProfileById(id)
+      .catch((err) => { next(err); });
+    res.status(200).send(profile);
   },
   updateProfile: async (req, res, next) => {
-    const { updateValues } = req.body;
-    // if no update values are supplied in request, or their type is other than object
-    // return 400 Bad Request status
-    if (!updateValues || typeof updateValues !== 'object') {
+    const { email, fullname } = req.body;
+    const { id } = req.params;
+    // if no update values are supplied in request, send 400 Bad Request status
+    if (!email && !fullname) {
       res.status(400).send('Invalid request');
       return;
     }
-    const updateKeys = Object.keys(updateValues);
-    // if any other update values than 'email' or 'fullname' are supplied in request,
-    // return 400 Bad Request status
-    if (updateKeys.some((el) => el !== 'email' && el !== 'fullname')) {
-      res.status(400).send('Invalid request');
+    // if profile doesn't exist, send 400 Bad Request status
+    const profileExists = await userProfiles
+      .checkIfProfileExists({ id })
+      .catch((err) => { next(err); });
+    if (!profileExists) {
+      res.status(400).send('Profile doesn\'t exist.');
       return;
     }
     // if user tries to change email to one that is already used, send 400 Bad Request status
-    if (updateValues.email) {
+    if (email) {
       const existingUser = await userProfiles
-        .getProfileByEmail(updateValues.email)
+        .checkIfProfileExists({ email })
         .catch((err) => { next(err); });
-      if (existingUser.length > 0) {
+      if (existingUser) {
         res.status(400).send('This email is already registered.');
         return;
       }
     }
     const updatedColumns = await userProfiles
-      .updateProfile(req.params.id, updateValues)
+      .updateProfile(id, { email, fullname })
       .catch((err) => { next(err); });
     res.status(200).send(updatedColumns);
   },
   deleteProfile: async (req, res, next) => {
     const { id } = req.params;
     // if user doesn't exist, send 400 Bad Request status
-    const userProfile = await userProfiles
-      .getProfileById(id)
+    const profileExists = await userProfiles
+      .checkIfProfileExists({ id })
       .catch((err) => { next(err); });
-    if (userProfile.length === 0) {
-      res.status(400).send(`User with id ${id} doesn't exist.`);
+    if (!profileExists) {
+      res.status(400).send('User doesn\'t exist.');
       return;
     }
     await userProfiles
-      .deleteProfile(id)
+      .updateProfile(id, { deleted_at: new Date(Date.now()).toUTCString() })
       .catch((err) => { next(err); });
     res.status(200).send('User successfully deleted.');
   }

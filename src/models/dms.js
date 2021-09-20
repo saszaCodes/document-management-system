@@ -8,6 +8,21 @@ class CRUD {
   constructor(table) {
     this.table = table;
   }
+  async checkIfEntryExists(conditions, customTable) {
+    const table = customTable || this.table;
+    const entry = await db
+      .select()
+      .where(conditions)
+      .from(table)
+      .catch((err) => { throw err; });
+    if (entry.length === 0) {
+      return false;
+    }
+    if (entry[0].deleted_at) {
+      return false;
+    }
+    return true;
+  }
   async createEntry(data, returnColumns) {
     const entry = await db(this.table)
       .insert(data, returnColumns)
@@ -52,26 +67,23 @@ class CRUD {
 }
 /** contains methods for CRUD operations in user_profiles table */
 class UserProfilesClass extends CRUD {
+  checkIfProfileExists(conditions) {
+    return this.checkIfEntryExists(conditions);
+  }
   addProfile(email, fullname) {
     if (!email) {
       throw new Error('email is required in function addUser()');
     }
     return this.createEntry({ email, fullname }, ['id', 'email', 'fullname']);
   }
-  getAllProfiles() {
-    return this.getAll(['id', 'email', 'fullname']);
+  getActiveProfiles() {
+    return this.getEntry({ deleted_at: null }, ['id', 'email', 'fullname']);
   }
   getProfileById(id) {
     return this.getEntry({ id }, ['id', 'email', 'fullname']);
   }
-  getProfileByEmail(email) {
-    return this.getEntry({ email }, ['id', 'email', 'fullname']);
-  }
   updateProfile(id, updateValues) {
     return this.updateEntry({ id }, updateValues, ['id', 'email', 'fullname']);
-  }
-  deleteProfile(id) {
-    return this.deleteEntry({ id });
   }
 }
 

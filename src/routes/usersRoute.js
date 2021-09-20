@@ -5,7 +5,7 @@ import { userProfilesService } from '../services';
 const usersRouter = express.Router();
 const { generic } = errorHandlers;
 
-usersRouter.get('/users', userProfilesService.fetchAllProfiles);
+usersRouter.get('/users', userProfilesService.fetchActiveProfiles);
 usersRouter.get('/users/:id', userProfilesService.fetchProfile);
 usersRouter.post('/users', userProfilesService.createProfile);
 usersRouter.put('/users/:id', userProfilesService.updateProfile);
