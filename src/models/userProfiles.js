@@ -71,4 +71,4 @@ class UserProfiles extends CRUD {
   }
 }
 
-export const userProfiles = UserProfiles('user_profiles');
+export const userProfiles = new UserProfiles('user_profiles');
