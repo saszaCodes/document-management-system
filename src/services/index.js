@@ -1,3 +1,4 @@
-import { userProfilesService, documentsService, userLoginsService } from './dmsService';
+import { documentsService } from './documentsService';
+import { usersService } from './usersService';
 
-export { userProfilesService, documentsService, userLoginsService };
+export { usersService, documentsService };
