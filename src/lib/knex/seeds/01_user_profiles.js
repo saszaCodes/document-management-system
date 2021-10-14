@@ -5,8 +5,6 @@ for (let i = 0; i < 500; i += 1) {
   const data = {
     email: faker.internet.email(),
     fullname: faker.name.findName(),
-    username: faker.internet.userName(),
-    password: faker.internet.password(),
   };
   if (Math.random() < 0.15) {
     data.deleted_at = faker.date.past();
