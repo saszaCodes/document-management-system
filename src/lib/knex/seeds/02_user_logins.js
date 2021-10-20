@@ -1,7 +1,7 @@
 import faker from 'faker/locale/en';
 
 const fakeData = [];
-const numberOfEntries = 200;
+const numberOfEntries = 500;
 for (let i = 0; i < numberOfEntries; i += 1) {
   const data = {
     username: faker.internet.userName(),
@@ -23,8 +23,8 @@ export function seed(knex) {
     // (user_profile_id entries can't be generated randomly by faker
     // because of foreign key constraint)
     .then((val) => {
-      if (numberOfEntries > val.length) {
-        throw new Error('You are trying to create more entries in user_logins than there are entries in user_profiles. This is not allowed, as these tables are in 1:1 relationship');
+      if (numberOfEntries !== val.length) {
+        throw new Error('You are trying to create different number of entries there are entries in user_profiles. This is not allowed.');
       } else {
         fakeData.forEach((el, index) => {
           el.user_profile_id = val[index].id;
