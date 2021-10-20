@@ -1,5 +1,3 @@
-/* eslint-disable class-methods-use-this */
-/* eslint-disable require-jsdoc */
 import { errorHandlers } from '../middleware';
 import { UserProfiles, UserLogins } from '../models';
 
@@ -11,6 +9,13 @@ class UsersService {
     this.userLogins = new UserLogins();
   }
 
+  /** Helper method. Finds a user matching given conditions
+   * @param {Object} req - request object
+   * @param {Object} res - response object
+   * @param {Function} next - passes errors to next Express middleware
+   * @param {Object} conditions - conditions to match. Accepted conditions: email, username, profileId
+   * @returns {Object or null} - if user is found, user's data is returned. If not, null is returned
+   */
   findUser = async (req, res, next, conditions) => {
     const { email, username, profileId } = conditions;
     if (!username && !email && !profileId) {
@@ -31,7 +36,6 @@ class UsersService {
         if (userProfile.length === 0 || (userProfile.length === 1 && userProfile[0].deleted_at)) {
           return null;
         }
-        
         userLogin = await this.userLogins.read({ user_profile_id: userProfile[0].id });
       }
       if (username) {
@@ -53,6 +57,12 @@ class UsersService {
     }
   }
 
+  /** creates new user in database and sends 200 OK status with user's data if successfuly created
+   * @param {Object} req - request object, expected properties: body.email*, body.fullname, body.username*, body.password* (* = required to create the user)
+   * @param {Object} res - response object
+   * @param {Function} next - passes errors to next Express middleware
+   * @returns {undefined}.
+   */
   createUser = async (req, res, next) => {
     const {
       email,
@@ -96,6 +106,12 @@ class UsersService {
     }
   }
 
+  /** fetches user from database and sends 200 OK status with user's data if successfuly fetched
+   * @param {Object} req - request object, expected properties: params.id
+   * @param {Object} res - response object
+   * @param {Function} next - passes errors to next Express middleware
+   * @returns {undefined}.
+   */
   fetchUser = async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -125,7 +141,12 @@ class UsersService {
       }
     }
   }
-
+  /** updates user's data in the database and sends 200 OK status with updated user's data if successfuly fetched
+   * @param {Object} req - request object, expected properties: params.id, body.email, body.fullname, body.username, body.password
+   * @param {Object} res - response object
+   * @param {Function} next - passes errors to next Express middleware
+   * @returns {undefined}.
+   */
   updateUser = async (req, res, next) => {
     const {
       email,
@@ -170,7 +191,12 @@ class UsersService {
       }
     }
   }
-  
+  /** updates deleted_at column of a given user in the database and sends 200 OK status with a success message if successfuly updated
+   * @param {Object} req - request object, expected properties: params.id
+   * @param {Object} res - response object
+   * @param {Function} next - passes errors to next Express middleware
+   * @returns {undefined}.
+   */
   deleteUser = async (req, res, next) => {
     const { id } = req.params;
     try {

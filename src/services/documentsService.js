@@ -1,4 +1,3 @@
-/* eslint-disable require-jsdoc */
 import { errorHandlers } from '../middleware';
 import { Documents, UserProfiles } from '../models';
 
@@ -10,6 +9,13 @@ class DocumentsService {
     this.userProfiles = new UserProfiles();
   }
 
+  /** Helper method. Finds a document matching given conditions
+   * @param {Object} req - request object
+   * @param {Object} res - response object
+   * @param {Function} next - passes errors to next Express middleware
+   * @param {Object} conditions - conditions to match. Accepted conditions: id
+   * @returns {Object or null} - if document is found, its data is returned. If not, null is returned
+   */
   findDocument = async (req, res, next, conditions) => {
     const { id } = conditions;
     if (!id) {
@@ -30,6 +36,12 @@ class DocumentsService {
     }
   }
 
+  /** creates new document in database and sends 200 OK status with document's data if successfuly created
+   * @param {Object} req - request object, expected properties: body.title*, body.body, body.authorId* (* = required to create the document)
+   * @param {Object} res - response object
+   * @param {Function} next - passes errors to next Express middleware
+   * @returns {undefined}.
+   */
   createDocument = async (req, res, next) => {
     const { title, body, authorId } = req.body;
     try {
@@ -57,6 +69,12 @@ class DocumentsService {
     }
   }
 
+  /** fetches document from the database and sends 200 OK status with document's data if successfuly fetched
+   * @param {Object} req - request object, expected properties: params.id
+   * @param {Object} res - response object
+   * @param {Function} next - passes errors to next Express middleware
+   * @returns {undefined}.
+   */
   fetchDocument = async (req, res, next) => {
     const { id } = req.params;
     try {
@@ -75,6 +93,12 @@ class DocumentsService {
     }
   }
 
+  /** updates the document in database and sends 200 OK status with document's data if successfuly updated
+   * @param {Object} req - request object, expected properties: params.id, body.title, body.body
+   * @param {Object} res - response object
+   * @param {Function} next - passes errors to next Express middleware
+   * @returns {undefined}.
+   */
   updateDocument = async (req, res, next) => {
     const { title, body } = req.body;
     const { id } = req.params;
@@ -99,6 +123,12 @@ class DocumentsService {
     }
   }
 
+  /** updates deleted_at column of a given document in database and sends 200 OK status with success message if successfuly updated
+   * @param {Object} req - request object, expected properties: params.id
+   * @param {Object} res - response object
+   * @param {Function} next - passes errors to next Express middleware
+   * @returns {undefined}.
+   */
   deleteDocument = async (req, res, next) => {
     const { id } = req.params;
     try {

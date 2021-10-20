@@ -1,4 +1,3 @@
-/* eslint-disable require-jsdoc */
 import { knex as db } from '../lib';
 import CRUD from './CRUD';
 
