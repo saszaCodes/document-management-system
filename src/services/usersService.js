@@ -3,7 +3,9 @@ import { UserProfiles, UserLogins } from '../models';
 
 const { generic } = errorHandlers;
 
+/** contains methods servicing users/ route */
 class UsersService {
+  /** initializes necessary models */
   constructor() {
     this.userProfiles = new UserProfiles();
     this.userLogins = new UserLogins();
@@ -13,8 +15,8 @@ class UsersService {
    * @param {Object} req - request object
    * @param {Object} res - response object
    * @param {Function} next - passes errors to next Express middleware
-   * @param {Object} conditions - conditions to match. Accepted conditions: email, username, profileId
-   * @returns {Object or null} - if user is found, user's data is returned. If not, null is returned
+   * @param {Object} conditions to match. Accepted conditions: email, username, profileId
+   * @returns {Object} - if user is found, user's data is returned. If not, null is returned
    */
   findUser = async (req, res, next, conditions) => {
     const { email, username, profileId } = conditions;
@@ -58,7 +60,8 @@ class UsersService {
   }
 
   /** creates new user in database and sends 200 OK status with user's data if successfuly created
-   * @param {Object} req - request object, expected properties: body.email*, body.fullname, body.username*, body.password* (* = required to create the user)
+   * @param {Object} req - request object, expected properties:
+   *  body.email*, body.fullname, body.username*, body.password* (* = required to create the user)
    * @param {Object} res - response object
    * @param {Function} next - passes errors to next Express middleware
    * @returns {undefined}.
@@ -78,7 +81,7 @@ class UsersService {
         return;
       }
       // emails and usernames need to be unique, if they already exist, send 400 Bad Request status
-      const user = await this.findUser(req, res, next, {email, username});
+      const user = await this.findUser(req, res, next, { email, username });
       if (user !== null) {
         res.status(400).send('Username or email already in use.');
         return;
@@ -116,11 +119,11 @@ class UsersService {
     try {
       const { id } = req.params;
       if (!id) {
-        res.status(400).send('You have to supply an id to GET user.')
+        res.status(400).send('You have to supply an id to GET user.');
         return;
       }
       // if user doesn't exist, send 404
-      const user = await this.findUser(req, res, next, {profileId: id});
+      const user = await this.findUser(req, res, next, { profileId: id });
       if (user === null) {
         res.status(404).send('User not found');
         return;
@@ -141,8 +144,10 @@ class UsersService {
       }
     }
   }
-  /** updates user's data in the database and sends 200 OK status with updated user's data if successfuly fetched
-   * @param {Object} req - request object, expected properties: params.id, body.email, body.fullname, body.username, body.password
+
+  /** updates user's data and sends 200 OK status with updated data if successfuly fetched
+   * @param {Object} req - request object, expected properties:
+   *  params.id, body.email, body.fullname, body.username, body.password
    * @param {Object} res - response object
    * @param {Function} next - passes errors to next Express middleware
    * @returns {undefined}.
@@ -154,17 +159,17 @@ class UsersService {
       username,
       password
     } = req.body;
-    const { id }= req.params
+    const { id } = req.params;
     try {
       if (!email && !fullname && !username && !password) {
-        res.status(400).send('You have to supply data to update.')
+        res.status(400).send('You have to supply data to update.');
         return;
       }
       if (!id) {
-        res.status(400).send('You have to supply an ID of the user to update.')
+        res.status(400).send('You have to supply an ID of the user to update.');
         return;
       }
-      const user = await this.findUser(req, res, next, { profileId: id })
+      const user = await this.findUser(req, res, next, { profileId: id });
       if (user === null) {
         res.status(404).send('User not found');
         return;
@@ -191,7 +196,9 @@ class UsersService {
       }
     }
   }
-  /** updates deleted_at column of a given user in the database and sends 200 OK status with a success message if successfuly updated
+
+  /** updates deleted_at column of a given user in the database and sends 200 OK status
+   *  with a success message if successfuly updated
    * @param {Object} req - request object, expected properties: params.id
    * @param {Object} res - response object
    * @param {Function} next - passes errors to next Express middleware

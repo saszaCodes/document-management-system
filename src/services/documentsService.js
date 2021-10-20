@@ -3,7 +3,9 @@ import { Documents, UserProfiles } from '../models';
 
 const { generic } = errorHandlers;
 
+/** contains methods servicing documents/ route */
 class DocumentsService {
+  /** initializes necessary models */
   constructor() {
     this.documents = new Documents();
     this.userProfiles = new UserProfiles();
@@ -14,7 +16,7 @@ class DocumentsService {
    * @param {Object} res - response object
    * @param {Function} next - passes errors to next Express middleware
    * @param {Object} conditions - conditions to match. Accepted conditions: id
-   * @returns {Object or null} - if document is found, its data is returned. If not, null is returned
+   * @returns {Object} - if document is found, its data is returned. If not, null is returned
    */
   findDocument = async (req, res, next, conditions) => {
     const { id } = conditions;
@@ -36,8 +38,9 @@ class DocumentsService {
     }
   }
 
-  /** creates new document in database and sends 200 OK status with document's data if successfuly created
-   * @param {Object} req - request object, expected properties: body.title*, body.body, body.authorId* (* = required to create the document)
+  /** creates new document in database and sends 200 OK status with its data if successfuly created
+   * @param {Object} req - request object, expected properties: body.title*, body.body,
+   * body.authorId* (* = required to create the document)
    * @param {Object} res - response object
    * @param {Function} next - passes errors to next Express middleware
    * @returns {undefined}.
@@ -69,7 +72,7 @@ class DocumentsService {
     }
   }
 
-  /** fetches document from the database and sends 200 OK status with document's data if successfuly fetched
+  /** fetches document from the database and sends 200OK status with its data if successfuly fetched
    * @param {Object} req - request object, expected properties: params.id
    * @param {Object} res - response object
    * @param {Function} next - passes errors to next Express middleware
@@ -93,7 +96,7 @@ class DocumentsService {
     }
   }
 
-  /** updates the document in database and sends 200 OK status with document's data if successfuly updated
+  /** updates the document in database and sends 200 OK status with its data if successfuly updated
    * @param {Object} req - request object, expected properties: params.id, body.title, body.body
    * @param {Object} res - response object
    * @param {Function} next - passes errors to next Express middleware
@@ -123,7 +126,8 @@ class DocumentsService {
     }
   }
 
-  /** updates deleted_at column of a given document in database and sends 200 OK status with success message if successfuly updated
+  /** updates deleted_at column of a given document in database and sends 200 OK status
+   *  with success message if successfuly updated
    * @param {Object} req - request object, expected properties: params.id
    * @param {Object} res - response object
    * @param {Function} next - passes errors to next Express middleware
