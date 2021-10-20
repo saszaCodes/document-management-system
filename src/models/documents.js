@@ -23,4 +23,4 @@ class Documents extends CRUD {
   }
 }
 
-export const documents = new Documents('documents');
+export default Documents;
