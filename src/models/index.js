@@ -1,5 +1,5 @@
 import { documents } from './documents';
-import { userLogins } from './userLogins';
-import { userProfiles } from './userProfiles';
+import UserLogins from './userLogins';
+import UserProfiles from './userProfiles';
 
-export { userProfiles, documents, userLogins };
+export { UserProfiles, documents, UserLogins };
