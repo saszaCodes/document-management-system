@@ -1,6 +1,10 @@
 {
     "root": true,
     "extends": "airbnb-base",
+    "plugins": [
+        "babel"
+    ],
+    "parser": "babel-eslint",
     "env": {
         "node": true,
         "es6": true,
@@ -31,5 +35,13 @@
                 "ClassDeclaration": true
             }
         }]
-    }
+    },
+    "overrides": [
+        {
+            "files": ["src/lib/knex/migrations/*.js", "src/lib/knex/seeds/*.js"],
+            "rules": {
+                "require-jsdoc": "off"
+            }
+        }
+    ]
 }

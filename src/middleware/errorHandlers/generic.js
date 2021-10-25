@@ -1,3 +1,5 @@
+import { logger } from '../../lib';
+
 /** function handling all non-specific errors. It creates an error with a generic message and passes
  * passes it to Express error handler using next() function (to handle asynchronous errors, which
  * wouldn't happen if the function just threw the error).
@@ -7,6 +9,7 @@
  * @returns {null}.
  */
 function generic(err, req, res) {
+  logger.error(err.stack);
   res.sendStatus(500);
 }
 
