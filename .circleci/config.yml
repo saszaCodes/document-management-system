@@ -20,14 +20,14 @@ jobs:
     steps:
       - checkout
       - run: #install dependencies
-        name: install-npm-dependencies
-        command: npm install
+          name: install-npm-dependencies
+          command: npm install
       - run: #run test script
-        name: test
-        command: npm run test
+          name: test
+          command: npm run test
       - run: #run code coverage report
-        name: code-coverage
-        command: npm run coveralls
+          name: code-coverage
+          command: npm run coveralls
 
 workflows:
   # Below is the definition of your workflow.
