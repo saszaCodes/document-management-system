@@ -2,7 +2,7 @@
   "name": "express-testing",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "dev": "npx nodemon -r dotenv/config --exec babel-node ./src/server.js",
     "build": "npx babel src --out-dir build",
