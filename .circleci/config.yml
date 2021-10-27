@@ -18,7 +18,7 @@ workflows:
   # Inside the workflow, you provide the jobs you want to run, e.g this workflow runs the build-and-test job above.
   # CircleCI will run this workflow on every commit.
   # For more details on extending your workflow, see the configuration docs: https://circleci.com/docs/2.0/configuration-reference/#workflows
-  sample:
+  test-and-deploy:
     jobs:
       - node/test
       - heroku/deploy-via-git:
@@ -28,5 +28,4 @@ workflows:
           filters:
             branches:
               # This sample config runs this job on any branch matching the regex below, however, it's more likely you want to only run this job on master.
-              only: /.*-heroku-deploy/ # Delete this line
-              # only: master  # Uncomment this line
+              only: chore/setup-ci-and-cd  # Uncomment this line
