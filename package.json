@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "dev": "npx nodemon -r dotenv/config --exec babel-node ./src/server.js",
+    "start": "node ./build/server.js",
     "build": "npx babel src --out-dir build",
     "lint": "npx eslint ./",
     "test": "npx jest --setupFiles dotenv/config",
