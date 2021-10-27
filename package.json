@@ -8,7 +8,8 @@
     "start": "node ./build/server.js",
     "build": "npx babel src --out-dir build",
     "lint": "npx eslint ./",
-    "test": "npx jest --setupFiles dotenv/config",
+    "test": "jest --setupFiles dotenv/config",
+    "coveralls": "jest --setupFiles dotenv/config --coverage && coveralls < coverage/lcov.info",
     "knex": "npx knex --knexfile=./src/lib/knex/knexfile.js --esm",
     "migrate:latest": "npm run knex migrate:latest",
     "migrate:rollback": "npm run knex migrate:rollback",
@@ -35,12 +36,14 @@
     "@babel/node": "^7.14.9",
     "@babel/preset-env": "^7.15.0",
     "babel-eslint": "^10.1.0",
+    "coveralls": "^3.1.1",
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-babel": "^5.3.1",
     "eslint-plugin-import": "^2.24.0",
     "jest": "^27.0.6",
     "nodemon": "^2.0.12",
+    "nyc": "^15.1.0",
     "supertest": "^6.1.5"
   }
 }
