@@ -28,6 +28,14 @@ jobs:
       - run: #run code coverage report
           name: code-coverage
           command: npm run coveralls
+  build:
+    docker:
+      - image: circleci/node:14.17.0
+    steps:
+      - checkout
+      - run: #build the app
+          name: build
+          command: npm run build
 
 workflows:
   # Below is the definition of your workflow.
@@ -37,13 +45,12 @@ workflows:
   test-and-deploy:
     jobs:
       - test-and-report-coverage
-      - node/run:
-          npm-run: build
+      - build
       - heroku/deploy-via-git:
           force: true # this parameter instructs the push to use a force flag when pushing to the heroku remote, see: https://devcenter.heroku.com/articles/git
           requires:
             - test-and-report-coverage # only run deploy-via-git job if the build job has completed
-            - node/run
+            - build
           filters:
             branches:
               # This sample config runs this job on any branch matching the regex below, however, it's more likely you want to only run this job on master.
