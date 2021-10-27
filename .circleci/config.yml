@@ -33,6 +33,9 @@ jobs:
       - image: circleci/node:14.17.0
     steps:
       - checkout
+      - run: #install dependencies
+          name: install-npm-dependencies
+          command: npm install
       - run: #build the app
           name: build
           command: npm run build
