@@ -1,4 +1,8 @@
 import express from 'express';
+// core-js and regenerator-runtime imports are necessary for babel to polyfill some ES6 features
+// and run polyfilled functions correctly
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
 import { errorHandlers, logging } from './middleware';
 import { usersRouter, documentsRouter } from './routes';
 
