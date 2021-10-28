@@ -124,7 +124,7 @@ class DocumentsService {
       // fetch only documents that weren't deleted
       const docs = await this.documents.read({ deleted_at: null }, limit, offset);
       // if no documents are found, send 404
-      if (docs.length === 0) {
+      if (docs === null) {
         res.status(404).send('No documents were found');
         return;
       }
