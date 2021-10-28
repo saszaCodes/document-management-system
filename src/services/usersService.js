@@ -1,5 +1,5 @@
 import { errorHandlers } from '../middleware';
-import { UserProfiles, UserLogins } from '../models';
+import { UserProfiles, UserLogins, Documents } from '../models';
 
 const { generic } = errorHandlers;
 
@@ -9,6 +9,7 @@ class UsersService {
   constructor() {
     this.userProfiles = new UserProfiles();
     this.userLogins = new UserLogins();
+    this.documents = new Documents();
   }
 
   /** Helper method. Finds a user matching given conditions
@@ -136,6 +137,35 @@ class UsersService {
         id: user.userProfile[0].id
       };
       res.status(200).send(userData);
+    } catch (err) {
+      if (res.headersSent) {
+        next(err);
+      } else {
+        generic(err, req, res);
+      }
+    }
+  }
+
+  /** fetches all documents created by given user
+   * @param {Object} req - request object, expected properties: params.id
+   * @param {Object} res - response object
+   * @param {Function} next - passes errors to next Express middleware
+   * @returns {undefined}
+   */
+  fetchUsersDocuments = async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      // const user = await this.findUser(req, res, next, { profileId: id });
+      // if (user === null) {
+      //   res.status(404).send('User not found');
+      //   return;
+      // }
+      const docs = await this.documents.read({ author_id: id });
+      if (docs.length === 0) {
+        res.status(404).send(`No documents were found for user with ID ${id}. If the ID is valid, that means this user created no documents.`);
+        return;
+      }
+      res.status(200).send(docs);
     } catch (err) {
       if (res.headersSent) {
         next(err);
