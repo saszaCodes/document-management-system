@@ -15,7 +15,7 @@ class DocumentsService {
    * @param {Object} req - request object
    * @param {Object} res - response object
    * @param {Function} next - passes errors to next Express middleware
-   * @param {Object} conditions - conditions to match. Accepted conditions: id
+   * @param {Object} conditions (optional) conditions to match
    * @param {Number} limit (optional) limits number of results
    * @param {Number} offset (optional) offsets the results
    * @returns {Object} - if document is found, its data is returned. If not, null is returned
@@ -28,9 +28,6 @@ class DocumentsService {
     limit = Number.MAX_SAFE_INTEGER,
     offset = 0
   ) => {
-    if (!conditions) {
-      return null;
-    }
     try {
       const documents = await this.documents.read(
         { deleted_at: null, ...conditions },
@@ -117,12 +114,20 @@ class DocumentsService {
    */
   fetchDocuments = async (req, res, next) => {
     try {
-      // retrieve parameters from query
+      // retrieve parameters from query and validate them
       let { limit, offset } = req.query;
-      if (limit) { limit = Number.parseInt(limit, 10); }
-      if (offset) { offset = Number.parseInt(offset, 10); }
+      if (limit) {
+        limit = Number.parseInt(limit, 10);
+        // eslint-disable-next-line no-unused-expressions
+        Number.isInteger(limit) ? null : limit = undefined;
+      }
+      if (offset) {
+        offset = Number.parseInt(offset, 10);
+        // eslint-disable-next-line no-unused-expressions
+        Number.isInteger(offset) ? null : offset = undefined;
+      }
       // fetch only documents that weren't deleted
-      const docs = await this.documents.read({ deleted_at: null }, limit, offset);
+      const docs = await this.findDocuments(req, res, next, {}, limit, offset);
       // if no documents are found, send 404
       if (docs === null) {
         res.status(404).send('No documents were found');
