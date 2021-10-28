@@ -96,6 +96,36 @@ class DocumentsService {
     }
   }
 
+  /** fetches all documents from the database (or some, if limit and offset are provided)
+   * @param {Object} req - request object, expected properties: route.limit, route.offset
+   * @param {Object} res - response object
+   * @param {Function} next - passes errors to next Express middleware
+   * @returns {undefined}.
+   */
+  fetchDocuments = async (req, res, next) => {
+    try {
+      // retrieve parameters from query
+      let { limit, offset } = req.query;
+      if (!limit) { limit = Number.MAX_SAFE_INTEGER; }
+      if (!offset) { offset = 0; }
+      // fetch only documents that weren't deleted
+      const docs = await this.documents.read({ deleted_at: null }, limit, offset);
+      // if no documents are found, send 404
+      if (docs.length === 0) {
+        res.status(404).send('No documents were found');
+        return;
+      }
+      // else, send 200 and documents
+      res.status(200).send(docs);
+    } catch (err) {
+      if (res.headersSent) {
+        next(err);
+      } else {
+        generic(err, req, res);
+      }
+    }
+  }
+
   /** updates the document in database and sends 200 OK status with its data if successfuly updated
    * @param {Object} req - request object, expected properties: params.id, body.title, body.body
    * @param {Object} res - response object

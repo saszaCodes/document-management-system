@@ -5,8 +5,9 @@ import { documentsService } from '../services';
 const documentsRouter = express.Router();
 const { generic } = errorHandlers;
 
-documentsRouter.get('/documents/:id', documentsService.fetchDocument);
 documentsRouter.post('/documents', documentsService.createDocument);
+documentsRouter.get('/documents', documentsService.fetchDocuments);
+documentsRouter.get('/documents/:id', documentsService.fetchDocument);
 documentsRouter.put('/documents/:id', documentsService.updateDocument);
 documentsRouter.delete('/documents/:id', documentsService.deleteDocument);
 documentsRouter.use('/documents', (err, req, res, next) => {
