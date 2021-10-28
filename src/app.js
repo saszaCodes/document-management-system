@@ -3,6 +3,8 @@ import express from 'express';
 // and run polyfilled functions correctly
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
+import swaggerUi from 'swagger-ui-express';
+import swaggerDoc from './swagger.json';
 import { errorHandlers, logging } from './middleware';
 import { usersRouter, documentsRouter } from './routes';
 
@@ -16,6 +18,7 @@ app.use(express.urlencoded({ extended: true })); // for parsing application/x-ww
 app.get('/', (req, res) => {
   res.send('This is my first Express server');
 });
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 app.use(usersRouter);
 app.use(documentsRouter);
 app.use('/', (err, req, res, next) => {
