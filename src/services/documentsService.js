@@ -91,11 +91,11 @@ class DocumentsService {
     const { id } = req.params;
     try {
       const docs = await this.findDocuments(req, res, next, { id });
-      const document = docs[0];
-      if (document === null) {
+      if (docs === null) {
         res.status(404).send('Document not found');
         return;
       }
+      const document = docs[0];
       res.status(200).send(document);
     } catch (err) {
       if (res.headersSent) {
@@ -159,8 +159,7 @@ class DocumentsService {
         return;
       }
       const docs = await this.findDocuments(req, res, next, { id });
-      const document = docs[0];
-      if (document === null) {
+      if (docs === null) {
         res.status(404).send('Document not found');
         return;
       }
@@ -186,8 +185,7 @@ class DocumentsService {
     const { id } = req.params;
     try {
       const docs = await this.findDocuments(req, res, next, { id });
-      const document = docs[0];
-      if (document === null) {
+      if (docs === null) {
         res.status(404).send('Document not found');
         return;
       }
