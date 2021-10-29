@@ -13,12 +13,18 @@
     "version" : "1.0.0"
   },
   "servers" : [ {
+    "description" : "SwaggerHub API Auto Mocking",
+    "url" : "https://virtserver.swaggerhub.com/dms-express/dms-express-test-2/1.0.0"
+  }, {
     "url" : "https://dms-express.herokuapp.com/",
     "description" : "Production server"
   } ],
   "tags" : [ {
     "name" : "/users",
-    "description" : "Operations about user"
+    "description" : "Operations on users"
+  }, {
+    "name" : "/documents",
+    "description" : "Operations on documents"
   } ],
   "paths" : {
     "/users" : {
@@ -162,7 +168,7 @@
           }
         } ],
         "requestBody" : {
-          "description" : "User's data to update",
+          "description" : "User data to update",
           "content" : {
             "application/json" : {
               "schema" : {
@@ -205,6 +211,16 @@
                 }
               }
             }
+          },
+          "404" : {
+            "description" : "User was not found",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       },
@@ -233,6 +249,194 @@
           },
           "404" : {
             "description" : "User was not found",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/documents" : {
+      "post" : {
+        "tags" : [ "/documents" ],
+        "summary" : "Create a new document",
+        "description" : "Apart from the author_id, supply at least one of the two: title, body, or the request will be invalid",
+        "requestBody" : {
+          "description" : "New document's data",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "required" : [ "author_id" ],
+                "properties" : {
+                  "title" : {
+                    "type" : "string"
+                  },
+                  "body" : {
+                    "type" : "string"
+                  },
+                  "author_id" : {
+                    "type" : "integer",
+                    "description" : "Has to be an ID of existing user"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Document created successfully",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DocumentData"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Either invalid request body (author_id and at least of the two: title, body is required in the request) or there is no user matching author_id",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/documents/{id}" : {
+      "get" : {
+        "tags" : [ "/documents" ],
+        "description" : "Get document by ID",
+        "parameters" : [ {
+          "name" : "id",
+          "description" : "ID of the document",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Document was found in the database",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DocumentData"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Document was not found",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "/documents" ],
+        "summary" : "Update document data",
+        "description" : "Supply at least one valid property in the request body, or it will be invalid",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "ID of the document",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "Document data to update",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "title" : {
+                    "type" : "string"
+                  },
+                  "body" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Document's data was successfuly updated",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DocumentData"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request body (at least one valid property is required in request body).",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Document was not found",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "/documents" ],
+        "summary" : "Delete document with given ID",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "ID of the document",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Document was successfuly deleted",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Document was not found",
             "content" : {
               "text" : {
                 "schema" : {
@@ -408,6 +612,29 @@
         "type" : "array",
         "items" : {
           "type" : "object"
+        }
+      },
+      "DocumentData" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer"
+          },
+          "author_id" : {
+            "type" : "integer"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "body" : {
+            "type" : "string"
+          },
+          "created_at" : {
+            "type" : "string"
+          },
+          "updated_at" : {
+            "type" : "string"
+          }
         }
       },
       "UserDto" : {
