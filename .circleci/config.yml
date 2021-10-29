@@ -37,13 +37,13 @@ workflows:
       - test-and-report-coverage:
           filters:
             branches:
-              only: chore/setup-ci-and-cd
+              only: main
       - build:
           requires:
             - test-and-report-coverage # only run build job if the test job has completed
           filters:
             branches:
-              only: chore/setup-ci-and-cd
+              only: main
       - heroku/deploy-via-git:
           force: true
           requires:
@@ -51,4 +51,4 @@ workflows:
             - build
           filters:
             branches:
-              only: chore/setup-ci-and-cd
+              only: main
