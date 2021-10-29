@@ -13,9 +13,6 @@
     "version" : "1.0.0"
   },
   "servers" : [ {
-    "description" : "SwaggerHub API Auto Mocking",
-    "url" : "https://virtserver.swaggerhub.com/dms-express/dms-express-test-2/1.0.0"
-  }, {
     "url" : "https://dms-express.herokuapp.com/",
     "description" : "Production server"
   } ],
