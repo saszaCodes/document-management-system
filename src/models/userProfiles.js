@@ -18,10 +18,15 @@ class UserProfiles extends CRUD {
 
   /** reads existing entry from the database
    * @param {Object} conditions restricting the results
+   * @param {Number} limit (optional) limits number of results
+   * @param {Number} offset (optional) offsets results
    * @returns {Promise} representing read operation
    */
-  read(conditions) {
-    return db(this.table).where(conditions);
+  read(conditions, limit, offset) {
+    return db(this.table)
+      .where(conditions)
+      .limit(limit)
+      .offset(offset);
   }
 
   /** udpates entry in the database
