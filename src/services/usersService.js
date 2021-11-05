@@ -1,3 +1,4 @@
+import { bcrypt } from '../lib';
 import { errorHandlers } from '../middleware';
 import { UserProfiles, UserLogins, Documents } from '../models';
 
@@ -77,10 +78,16 @@ class UsersService {
       }
       // create entry in user_profiles table;
       const userProfile = await this.userProfiles.create({ email, fullname });
+      // hash password
+      const hashedPwd = await bcrypt.hashPwd(password);
       // create entry in user_logins table
       // eslint-disable-next-line camelcase
       const user_profile_id = userProfile[0].id;
-      const userLogin = await this.userLogins.create({ user_profile_id, username, password });
+      const userLogin = await this.userLogins.create({
+        user_profile_id,
+        username,
+        password: hashedPwd
+      });
       // if user is successfully created, send their email, fullname and id
       const newUser = {
         id: userProfile[0].id,
