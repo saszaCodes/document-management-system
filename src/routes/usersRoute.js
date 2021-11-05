@@ -5,6 +5,7 @@ import { usersService } from '../services';
 const usersRouter = express.Router();
 const { generic } = errorHandlers;
 
+usersRouter.get('/users', usersService.fetchUsers);
 usersRouter.post('/users', usersService.createUser);
 usersRouter.get('/users/:id', usersService.fetchUser);
 usersRouter.put('/users/:id', usersService.updateUser);

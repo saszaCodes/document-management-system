@@ -128,6 +128,44 @@ class UsersService {
     }
   }
 
+  /** fetches all users from the database (or some, if limit and offset are provided)
+   * @param {Object} req - request object, expected properties: route.limit, route.offset
+   * @param {Object} res - response object
+   * @param {Function} next - passes errors to next Express middleware
+   * @returns {undefined}.
+   */
+  fetchUsers = async (req, res, next) => {
+    try {
+      // retrieve parameters from query and validate them
+      let { limit, offset } = req.query;
+      if (limit) {
+        limit = Number.parseInt(limit, 10);
+        // eslint-disable-next-line no-unused-expressions
+        Number.isInteger(limit) ? null : limit = undefined;
+      }
+      if (offset) {
+        offset = Number.parseInt(offset, 10);
+        // eslint-disable-next-line no-unused-expressions
+        Number.isInteger(offset) ? null : offset = undefined;
+      }
+      // fetch only users that weren't deleted
+      const users = await this.findUsers(req, res, next, {}, limit, offset);
+      // if no documents are found, send 404
+      if (users === null) {
+        res.status(404).send('No documents were found');
+        return;
+      }
+      // else, send 200 and documents
+      res.status(200).send(users);
+    } catch (err) {
+      if (res.headersSent) {
+        next(err);
+      } else {
+        generic(err, req, res);
+      }
+    }
+  }
+
   /** fetches all documents created by given user
    * @param {Object} req - request object, expected properties: params.id
    * @param {Object} res - response object
