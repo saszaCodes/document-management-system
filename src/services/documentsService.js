@@ -61,8 +61,9 @@ class DocumentsService {
         res.status(400).send('Wrong author ID, such user doesn\'t exist');
         return;
       }
-      const document = await this.documents.create({ title, body, author_id: authorId });
-      res.status(200).send(document[0]);
+      const documents = await this.documents.create({ title, body, author_id: authorId });
+      const document = documents[0];
+      res.status(200).send(document);
     } catch (err) {
       if (res.headersSent) {
         next(err);
@@ -81,11 +82,12 @@ class DocumentsService {
   fetchDocument = async (req, res, next) => {
     const { id } = req.params;
     try {
-      const document = await this.findDocument(req, res, next, { id });
-      if (document === null) {
+      const documents = await this.findDocument(req, res, next, { id });
+      if (documents === null) {
         res.status(404).send('Document not found');
         return;
       }
+      const document = documents[0];
       res.status(200).send(document);
     } catch (err) {
       if (res.headersSent) {

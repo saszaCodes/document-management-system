@@ -70,8 +70,8 @@ class UsersService {
         return;
       }
       // emails and usernames need to be unique, if they already exist, send 400 Bad Request status
-      const user = await this.findUsers(req, res, next, { email, username });
-      if (user !== null) {
+      const users = await this.findUsers(req, res, next, { email, username });
+      if (users !== null) {
         res.status(400).send('Username or email already in use.');
         return;
       }
@@ -112,12 +112,13 @@ class UsersService {
         return;
       }
       // if user doesn't exist, send 404
-      const user = await this.findUsers(req, res, next, { 'user_profiles.id': id });
-      if (user === null) {
+      const users = await this.findUsers(req, res, next, { 'user_profiles.id': id });
+      if (users === null) {
         res.status(404).send('User not found');
         return;
       }
       // else, send 200 with user data
+      const user = users[0];
       res.status(200).send(user);
     } catch (err) {
       if (res.headersSent) {
@@ -152,10 +153,10 @@ class UsersService {
       const users = await this.findUsers(req, res, next, {}, limit, offset);
       // if no documents are found, send 404
       if (users === null) {
-        res.status(404).send('No documents were found');
+        res.status(404).send('No users were found');
         return;
       }
-      // else, send 200 and documents
+      // else, send 200 and users
       res.status(200).send(users);
     } catch (err) {
       if (res.headersSent) {
