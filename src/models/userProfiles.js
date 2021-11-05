@@ -25,7 +25,8 @@ class UserProfiles extends CRUD {
    */
   read(conditions, limit, offset) {
     return db(this.table)
-      .where(conditions, this.returnColumns)
+      .select(...this.returnColumns)
+      .where(conditions)
       .limit(limit)
       .offset(offset);
   }
