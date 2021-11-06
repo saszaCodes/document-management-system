@@ -16,10 +16,7 @@ class SearchService {
    * @param {Object} req - request object
    * @param {Object} res - response object
    * @param {Function} next - passes errors to next Express middleware
-   * @param {Object} conditions to match. Accepted conditions: email, username, id
-   * @param {Number} limit (optional) limits number of results
-   * @param {Number} offset (optional) offsets the results
-   * @returns {Object} - if user is found, user's data is returned. If not, null is returned
+   * @returns {undefined}
    */
   searchForUsers = async (req, res, next) => {
     try {
