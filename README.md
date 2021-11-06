@@ -5,6 +5,8 @@
 ### Overview of the project
 This project is a barebones document management system, built for learning purposes. The project is designed to run in Node.js environment and uses Express.js framework. Recommended package manager for the project is npm.
 
+Check out API reference [here](https://dms-express.herokuapp.com/api-docs).
+
 ### Features
 (new features will be added to the list when they are merged to the main branch)
 
