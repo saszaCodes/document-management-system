@@ -6,6 +6,7 @@ class Documents extends CRUD {
   /** calls parent class constructor, which sets this.table */
   constructor() {
     super('documents');
+    this.returnColumns = ['id', 'author_id', 'title', 'body'];
   }
 
   /** creates new entry in the database
@@ -13,7 +14,7 @@ class Documents extends CRUD {
    * @returns {Promise} representing entry operation
    */
   create(data) {
-    return db(this.table).insert(data, '*');
+    return db(this.table).insert(data, this.returnColumns);
   }
 
   /** reads existing entry from the database
@@ -24,6 +25,7 @@ class Documents extends CRUD {
    */
   read(conditions, limit, offset) {
     return db(this.table)
+      .select(...this.returnColumns)
       .where(conditions)
       .limit(limit)
       .offset(offset);
@@ -37,7 +39,7 @@ class Documents extends CRUD {
   update(conditions, data) {
     return db(this.table)
       .where(conditions)
-      .update(data, '*');
+      .update(data, this.returnColumns);
   }
 }
 
