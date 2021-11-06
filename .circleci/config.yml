@@ -1,0 +1,54 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@4.1
+  heroku: circleci/heroku@1.2
+
+jobs:
+  test-and-report-coverage:
+    docker:
+      - image: circleci/node:14.17.0
+    steps:
+      - checkout
+      - run: #install dependencies
+          name: install-npm-dependencies
+          command: npm install
+      - run: #run test script
+          name: test
+          command: npm run test
+      - run: #run code coverage report
+          name: code-coverage
+          command: npm run coveralls
+  build:
+    docker:
+      - image: circleci/node:14.17.0
+    steps:
+      - checkout
+      - run: #install dependencies
+          name: install-npm-dependencies
+          command: npm install
+      - run: #build the app
+          name: build
+          command: npm run build
+
+workflows:
+  test-and-deploy:
+    jobs:
+      - test-and-report-coverage:
+          filters:
+            branches:
+              only: main
+      - build:
+          requires:
+            - test-and-report-coverage # only run build job if the test job has completed
+          filters:
+            branches:
+              only: main
+      - heroku/deploy-via-git:
+          force: true
+          requires:
+            - test-and-report-coverage # only run deploy-via-git job if the build and test jobs have completed
+            - build
+          filters:
+            branches:
+              only: main
