@@ -18,15 +18,25 @@ class Documents extends CRUD {
   }
 
   /** reads existing entry from the database
-   * @param {Object} conditions restricting the results
+   * @param {Object} conditionsObj object with key/value pairs restricting the results
+   * @param {Array} conditionsArr array of strings, which form a condition
    * @param {Number} limit (optional) limits number of results
    * @param {Number} offset (optional) offsets results
    * @returns {Promise} representing read operation
    */
-  read(conditions, limit, offset) {
+  read(conditionsObj, conditionsArr, limit, offset) {
+    let conditions;
+    if (conditionsObj) {
+      // put conditionsObj inside and array to make sure
+      // the spread operator in where() works as expected
+      conditions = [conditionsObj];
+    } else {
+      conditions = conditionsArr;
+    }
     return db(this.table)
       .select(...this.returnColumns)
       .where(conditions)
+      .andWhere({ deleted_at: null })
       .limit(limit)
       .offset(offset);
   }

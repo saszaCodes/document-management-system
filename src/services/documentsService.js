@@ -31,6 +31,7 @@ class DocumentsService {
     try {
       const documents = await this.documents.read(
         { deleted_at: null, ...conditions },
+        null,
         limit,
         offset
       );
