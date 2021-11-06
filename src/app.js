@@ -4,7 +4,7 @@ import express from 'express';
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import { errorHandlers, logging } from './middleware';
-import { usersRouter, documentsRouter } from './routes';
+import { usersRouter, documentsRouter, searchRouter } from './routes';
 
 const app = express();
 const { generic } = errorHandlers;
@@ -18,6 +18,7 @@ app.get('/', (req, res) => {
 });
 app.use(usersRouter);
 app.use(documentsRouter);
+app.use(searchRouter);
 app.use('/', (err, req, res, next) => {
   // if response has already started streaming and error occurs, pass it to Express
   // default error handler - it will close the connection and fail the request.
