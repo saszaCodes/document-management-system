@@ -21,14 +21,7 @@ class SearchService {
    * @param {Number} offset (optional) offsets the results
    * @returns {Object} - if user is found, user's data is returned. If not, null is returned
    */
-  searchForUsers = async (
-    req,
-    res,
-    next,
-    // conditions,
-    // limit = Number.MAX_SAFE_INTEGER,
-    // offset = 0
-  ) => {
+  searchForUsers = async (req, res, next) => {
     try {
       // validate the request
       const { q } = req.query;
@@ -36,27 +29,16 @@ class SearchService {
       if (!searchBy) {
         searchBy = 'username';
       }
+      if (searchBy !== 'username' && searchBy !== 'email' && searchBy !== 'fullname') {
+        res.status(400).send('You can only search users by following markers: username, email and fullname');
+        return;
+      }
       if (!q) {
         res.status(400).send('You must provide query parameters. If you want to fetch all users, send GET to /users endpoint');
         return;
       }
-      let users;
-      switch (searchBy) {
-        default:
-          res.status(400).send('You can only search users by following markers: username, email and fullname');
-          return;
-        // if request is valid, read from the database
-        case 'username':
-          users = await this.userProfiles.readWithLogins({ deleted_at: null, username: q });
-          break;
-        case 'email':
-          users = await this.userProfiles.readWithLogins({ deleted_at: null, email: q });
-          break;
-        case 'fullname':
-          users = await this.userProfiles.readWithLogins({ deleted_at: null, fullname: q });
-          break;
-      }
-      console.log(q);
+      const conditionsStr = [`${searchBy}`, 'like', `%${q}%`];
+      const users = await this.userProfiles.readWithLogins(null, conditionsStr);
       // if no users are found, send 200 OK with appropriate info
       if (users.length === 0) {
         res.status(200).send('No users matching your criteria were found');

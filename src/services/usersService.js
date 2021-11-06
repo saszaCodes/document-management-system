@@ -32,7 +32,8 @@ class UsersService {
   ) => {
     try {
       const users = await this.userProfiles.readWithLogins(
-        { deleted_at: null, ...conditions },
+        conditions,
+        null,
         limit,
         offset
       );
