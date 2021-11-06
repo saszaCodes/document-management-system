@@ -30,7 +30,7 @@ class DocumentsService {
   ) => {
     try {
       const documents = await this.documents.read(
-        { deleted_at: null, ...conditions },
+        conditions,
         null,
         limit,
         offset
@@ -67,7 +67,7 @@ class DocumentsService {
         return;
       }
       const user = await this.userProfiles.read({ id: authorId });
-      if (user.length === 0 || (user.length === 1 && user[0].deleted_at)) {
+      if (user.length === 0) {
         res.status(400).send('Wrong author ID, such user doesn\'t exist');
         return;
       }
