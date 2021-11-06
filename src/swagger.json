@@ -22,6 +22,9 @@
   }, {
     "name" : "/documents",
     "description" : "Operations on documents"
+  }, {
+    "name" : "/search",
+    "description" : "Search operations"
   } ],
   "paths" : {
     "/users" : {
@@ -52,11 +55,21 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "Successful operation",
+            "description" : "Users were found",
             "content" : {
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/UsersList"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No users were found in the database",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
                 }
               }
             }
@@ -257,7 +270,92 @@
         }
       }
     },
+    "/users/{id}/documents" : {
+      "get" : {
+        "tags" : [ "/users" ],
+        "summary" : "Get documents of user with given ID",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "ID of the user",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Documents were found for a given user",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DocumentsList"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No documents were found for user with given ID",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/documents" : {
+      "get" : {
+        "tags" : [ "/documents" ],
+        "summary" : "Get all documents",
+        "description" : "Pass optional query parameters to limit or offset number of results",
+        "parameters" : [ {
+          "name" : "limit",
+          "in" : "query",
+          "description" : "Number of records to fetch",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "name" : "offset",
+          "in" : "query",
+          "description" : "Number of records to offset",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Document found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DocumentsList"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No documents were found in the database",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
       "post" : {
         "tags" : [ "/documents" ],
         "summary" : "Create a new document",
@@ -444,6 +542,92 @@
           }
         }
       }
+    },
+    "/search/users": {
+      "get" : {
+        "tags" : [ "/search" ],
+        "summary" : "Get users matching the query",
+        "description" : "Pass query parameters to define search criteria",
+        "parameters" : [ {
+          "name" : "q",
+          "in" : "query",
+          "description" : "String to match against",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "searchBy",
+          "in" : "query",
+          "description" : "Category to search by. Accepted values are: username, email, fullname. If this query parameter is not supplied, users are searched by username by default",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Query was valid and either some users were found or not (if no users were found, response is a string with info, not an array)",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UsersList"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid query",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/search/documents": {
+      "get" : {
+        "tags" : [ "/search" ],
+        "summary" : "Get documents matching the query",
+        "description" : "Pass query parameters to define a string to match against document titles",
+        "parameters" : [
+          {
+            "name" : "q",
+            "in" : "query",
+            "description" : "String to match against",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "description" : "Query was valid and either some documents were found or not (if no documents were found, response is a string with info, not an array)",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DocumentsList"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid query",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components" : {
@@ -468,7 +652,7 @@
       "UsersList" : {
         "type" : "array",
         "items" : {
-          "type" : "object"
+          "$ref" : "#/components/schemas/UserData"
         }
       },
       "DocumentData" : {
@@ -485,13 +669,13 @@
           },
           "body" : {
             "type" : "string"
-          },
-          "created_at" : {
-            "type" : "string"
-          },
-          "updated_at" : {
-            "type" : "string"
           }
+        }
+      },
+      "DocumentsList" : {
+        "type" : "array",
+        "items" : {
+          "$ref" : "#/components/schemas/DocumentData"
         }
       },
       "Error" : {
