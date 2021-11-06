@@ -24,12 +24,8 @@ class SearchService {
       // validate the request
       const { q } = req.query;
       let { searchBy } = req.query;
-      if (!searchBy) {
+      if (!searchBy || (searchBy !== 'username' && searchBy !== 'email' && searchBy !== 'fullname')) {
         searchBy = 'username';
-      }
-      if (searchBy !== 'username' && searchBy !== 'email' && searchBy !== 'fullname') {
-        res.status(400).send('You can only search users by following markers: username, email and fullname');
-        return;
       }
       if (!q) {
         res.status(400).send('You must provide query parameters. If you want to fetch all users, send GET to /users endpoint');
