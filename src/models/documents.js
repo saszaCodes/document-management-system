@@ -35,7 +35,7 @@ class Documents extends CRUD {
     }
     return db(this.table)
       .select(...this.returnColumns)
-      .where(conditions)
+      .where(...conditions)
       .andWhere({ deleted_at: null })
       .limit(limit)
       .offset(offset);
