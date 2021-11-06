@@ -1,5 +1,7 @@
 # Document Management System
 
+[![Coverage Status](https://coveralls.io/repos/github/tepeszCodes/document-management-system/badge.svg?branch=chore/setup-ci-and-cd)](https://coveralls.io/github/tepeszCodes/document-management-system?branch=chore/setup-ci-and-cd) [![tepeszCodes](https://circleci.com/gh/tepeszCodes/document-management-system.svg?style=shield)](https://app.circleci.com/pipelines/github/tepeszCodes/document-management-system)
+
 ### Overview of the project
 This project is a barebones document management system, built for learning purposes. The project is designed to run in Node.js environment and uses Express.js framework. Recommended package manager for the project is npm.
 
