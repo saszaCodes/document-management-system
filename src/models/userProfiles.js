@@ -17,27 +17,47 @@ class UserProfiles extends CRUD {
     return db(this.table).insert(data, this.returnColumns);
   }
 
-  /** reads existing entry from the database
-   * @param {Object} conditions restricting the results
+  /** reads existing entry from the database. If both conditionsObj and conditionsStr are supplied,
+   * conditionsObj takes precedence and conditionsStr is ignored
+   * @param {Object} conditionsObj object with key/value pairs restricting the results
+   * @param {Array} conditionsArr array of strings, which form a condition
    * @param {Number} limit (optional) limits number of results
    * @param {Number} offset (optional) offsets results
    * @returns {Promise} representing read operation
    */
-  read(conditions, limit, offset) {
+  read(conditionsObj, conditionsArr, limit, offset) {
+    let conditions;
+    if (conditionsObj) {
+      // put conditionsObj inside and array to make sure
+      // the spread operator in where() works as expected
+      conditions = [conditionsObj];
+    } else {
+      conditions = conditionsArr;
+    }
     return db(this.table)
       .select(...this.returnColumns)
-      .where(conditions)
+      .where(...conditions)
+      .andWhere({ deleted_at: null })
       .limit(limit)
       .offset(offset);
   }
 
   /** reads existing entry from the database
-   * @param {Object} conditions restricting the results
+   * @param {Object} conditionsObj object with key/value pairs restricting the results
+   * @param {Array} conditionsArr array of strings, which form a condition
    * @param {Number} limit (optional) limits number of results
    * @param {Number} offset (optional) offsets results
    * @returns {Promise} representing read operation
    */
-  readWithLogins(conditions, limit, offset) {
+  readWithLogins(conditionsObj, conditionsArr, limit, offset) {
+    let conditions;
+    if (conditionsObj) {
+      // put conditionsObj inside and array to make sure
+      // the spread operator in where() works as expected
+      conditions = [conditionsObj];
+    } else {
+      conditions = conditionsArr;
+    }
     return db(this.table)
       .join('user_logins', 'user_profiles.id', '=', 'user_logins.user_profile_id')
       .select(
@@ -46,7 +66,8 @@ class UserProfiles extends CRUD {
         'user_profiles.fullname',
         'user_logins.username'
       )
-      .where(conditions)
+      .where(...conditions)
+      .andWhere({ deleted_at: null })
       .limit(limit)
       .offset(offset);
   }
