@@ -1,4 +1,4 @@
-import { bcrypt } from '../lib';
+import { Bcrypt } from '../lib';
 import { errorHandlers } from '../middleware';
 import { UserProfiles, UserLogins, Documents } from '../models';
 
@@ -80,7 +80,7 @@ class UsersService {
       // create entry in user_profiles table;
       const userProfile = await this.userProfiles.create({ email, fullname });
       // hash password
-      const hashedPwd = await bcrypt.hashPwd(password);
+      const hashedPwd = await Bcrypt.hashPwd(password);
       // create entry in user_logins table
       // eslint-disable-next-line camelcase
       const user_profile_id = userProfile[0].id;

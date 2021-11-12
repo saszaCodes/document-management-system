@@ -1,5 +1,5 @@
 import logger from './logger';
 import knex from './knex';
-import bcrypt from './bcrypt';
+import Bcrypt from './bcrypt';
 
-export { logger, knex, bcrypt };
+export { logger, knex, Bcrypt };
