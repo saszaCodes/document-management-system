@@ -15,20 +15,30 @@ class DocumentsService {
    * @param {Object} req - request object
    * @param {Object} res - response object
    * @param {Function} next - passes errors to next Express middleware
-   * @param {Object} conditions - conditions to match. Accepted conditions: id
+   * @param {Object} conditions (optional) conditions to match
+   * @param {Number} limit (optional) limits number of results
+   * @param {Number} offset (optional) offsets the results
    * @returns {Object} - if document is found, its data is returned. If not, null is returned
    */
-  findDocument = async (req, res, next, conditions) => {
-    const { id } = conditions;
-    if (!id) {
-      return null;
-    }
+  findDocuments = async (
+    req,
+    res,
+    next,
+    conditions,
+    limit = Number.MAX_SAFE_INTEGER,
+    offset = 0
+  ) => {
     try {
-      const document = await this.documents.read({ id });
-      if (document.length === 0 || (document.length === 1 && document[0].deleted_at)) {
+      const documents = await this.documents.read(
+        conditions,
+        null,
+        limit,
+        offset
+      );
+      if (documents.length === 0) {
         return null;
       }
-      return document[0];
+      return documents;
     } catch (err) {
       if (res.headersSent) {
         next(err);
@@ -57,12 +67,13 @@ class DocumentsService {
         return;
       }
       const user = await this.userProfiles.read({ id: authorId });
-      if (user.length === 0 || (user.length === 1 && user[0].deleted_at)) {
+      if (user.length === 0) {
         res.status(400).send('Wrong author ID, such user doesn\'t exist');
         return;
       }
-      const document = await this.documents.create({ title, body, author_id: authorId });
-      res.status(200).send(document[0]);
+      const documents = await this.documents.create({ title, body, author_id: authorId });
+      const document = documents[0];
+      res.status(200).send(document);
     } catch (err) {
       if (res.headersSent) {
         next(err);
@@ -81,12 +92,51 @@ class DocumentsService {
   fetchDocument = async (req, res, next) => {
     const { id } = req.params;
     try {
-      const document = await this.findDocument(req, res, next, { id });
-      if (document === null) {
+      const docs = await this.findDocuments(req, res, next, { id });
+      if (docs === null) {
         res.status(404).send('Document not found');
         return;
       }
+      const document = docs[0];
       res.status(200).send(document);
+    } catch (err) {
+      if (res.headersSent) {
+        next(err);
+      } else {
+        generic(err, req, res);
+      }
+    }
+  }
+
+  /** fetches all documents from the database (or some, if limit and offset are provided)
+   * @param {Object} req - request object, expected properties: route.limit, route.offset
+   * @param {Object} res - response object
+   * @param {Function} next - passes errors to next Express middleware
+   * @returns {undefined}.
+   */
+  fetchDocuments = async (req, res, next) => {
+    try {
+      // retrieve parameters from query and validate them
+      let { limit, offset } = req.query;
+      if (limit) {
+        limit = Number.parseInt(limit, 10);
+        // eslint-disable-next-line no-unused-expressions
+        Number.isInteger(limit) ? null : limit = undefined;
+      }
+      if (offset) {
+        offset = Number.parseInt(offset, 10);
+        // eslint-disable-next-line no-unused-expressions
+        Number.isInteger(offset) ? null : offset = undefined;
+      }
+      // fetch only documents that weren't deleted
+      const docs = await this.findDocuments(req, res, next, {}, limit, offset);
+      // if no documents are found, send 404
+      if (docs === null) {
+        res.status(404).send('No documents were found');
+        return;
+      }
+      // else, send 200 and documents
+      res.status(200).send(docs);
     } catch (err) {
       if (res.headersSent) {
         next(err);
@@ -110,8 +160,8 @@ class DocumentsService {
         res.status(400).send('You have to update title or body');
         return;
       }
-      const document = await this.findDocument(req, res, next, { id });
-      if (document === null) {
+      const docs = await this.findDocuments(req, res, next, { id });
+      if (docs === null) {
         res.status(404).send('Document not found');
         return;
       }
@@ -136,8 +186,8 @@ class DocumentsService {
   deleteDocument = async (req, res, next) => {
     const { id } = req.params;
     try {
-      const document = await this.findDocument(req, res, next, { id });
-      if (document === null) {
+      const docs = await this.findDocuments(req, res, next, { id });
+      if (docs === null) {
         res.status(404).send('Document not found');
         return;
       }

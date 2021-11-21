@@ -3,7 +3,7 @@ export function up(knex) {
     .createTable('user_logins', (table) => {
       table.increments('id');
       table.string('username').notNullable();
-      table.string('password').notNullable();
+      table.string('password', 255).notNullable();
       table.integer('user_profile_id').notNullable().references('id').inTable('user_profiles');
       table.date('last_login');
     });

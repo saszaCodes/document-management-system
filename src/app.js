@@ -3,8 +3,10 @@ import express from 'express';
 // and run polyfilled functions correctly
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
+import swaggerUi from 'swagger-ui-express';
+import swaggerDoc from './swagger.json';
 import { errorHandlers, logging } from './middleware';
-import { usersRouter, documentsRouter } from './routes';
+import { usersRouter, documentsRouter, searchRouter } from './routes';
 
 const app = express();
 const { generic } = errorHandlers;
@@ -16,8 +18,10 @@ app.use(express.urlencoded({ extended: true })); // for parsing application/x-ww
 app.get('/', (req, res) => {
   res.send('This is my first Express server');
 });
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 app.use(usersRouter);
 app.use(documentsRouter);
+app.use(searchRouter);
 app.use('/', (err, req, res, next) => {
   // if response has already started streaming and error occurs, pass it to Express
   // default error handler - it will close the connection and fail the request.

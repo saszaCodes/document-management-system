@@ -1,0 +1,686 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Document Management System",
+    "contact" : {
+      "name" : "tepeszCodes",
+      "url" : "https://github.com/tepeszCodes"
+    },
+    "license" : {
+      "name" : "MIT",
+      "url" : "https://opensource.org/licenses/MIT"
+    },
+    "version" : "1.0.0"
+  },
+  "servers" : [ {
+    "url" : "https://dms-express.herokuapp.com/",
+    "description" : "Production server"
+  } ],
+  "tags" : [ {
+    "name" : "/users",
+    "description" : "Operations on users"
+  }, {
+    "name" : "/documents",
+    "description" : "Operations on documents"
+  }, {
+    "name" : "/search",
+    "description" : "Search operations"
+  } ],
+  "paths" : {
+    "/users" : {
+      "get" : {
+        "tags" : [ "/users" ],
+        "summary" : "Get all users",
+        "description" : "Pass optional query parameters to limit or offset number of results",
+        "parameters" : [ {
+          "name" : "limit",
+          "in" : "query",
+          "description" : "Number of records to fetch",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "name" : "offset",
+          "in" : "query",
+          "description" : "Number of records to offset",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Users were found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UsersList"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No users were found in the database",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "/users" ],
+        "summary" : "Create a new user",
+        "requestBody" : {
+          "description" : "New user data",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "required" : [ "email username password" ],
+                "properties" : {
+                  "email" : {
+                    "type" : "string"
+                  },
+                  "fullname" : {
+                    "type" : "string"
+                  },
+                  "username" : {
+                    "type" : "string"
+                  },
+                  "password" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "User created successfully",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserData"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Either invalid request body (missing required properties) or user with supplied email or username already exists",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}" : {
+      "get" : {
+        "tags" : [ "/users" ],
+        "summary" : "Get user by ID",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "ID of the user",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "User was found in the database",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserData"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "User was not found",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "/users" ],
+        "summary" : "Update user data",
+        "description" : "Supply at least one valid property in the request body, or it will be invalid",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "ID of the user",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "User data to update",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "email" : {
+                    "type" : "string"
+                  },
+                  "fullname" : {
+                    "type" : "string"
+                  },
+                  "username" : {
+                    "type" : "string"
+                  },
+                  "password" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "User's data was successfuly updated",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserData"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request body (at least one valid property is required in request body).",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "User was not found",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "/users" ],
+        "summary" : "Delete user with given ID",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "ID of the user",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "User was successfuly deleted",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "User was not found",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}/documents" : {
+      "get" : {
+        "tags" : [ "/users" ],
+        "summary" : "Get documents of user with given ID",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "ID of the user",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Documents were found for a given user",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DocumentsList"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No documents were found for user with given ID",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/documents" : {
+      "get" : {
+        "tags" : [ "/documents" ],
+        "summary" : "Get all documents",
+        "description" : "Pass optional query parameters to limit or offset number of results",
+        "parameters" : [ {
+          "name" : "limit",
+          "in" : "query",
+          "description" : "Number of records to fetch",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "name" : "offset",
+          "in" : "query",
+          "description" : "Number of records to offset",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Document found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DocumentsList"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No documents were found in the database",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "/documents" ],
+        "summary" : "Create a new document",
+        "description" : "Apart from the author_id, supply at least one of the two: title, body, or the request will be invalid",
+        "requestBody" : {
+          "description" : "New document's data",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "required" : [ "author_id" ],
+                "properties" : {
+                  "title" : {
+                    "type" : "string"
+                  },
+                  "body" : {
+                    "type" : "string"
+                  },
+                  "author_id" : {
+                    "type" : "integer",
+                    "description" : "Has to be an ID of existing user"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Document created successfully",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DocumentData"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Either invalid request body (author_id and at least of the two: title, body is required in the request) or there is no user matching author_id",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/documents/{id}" : {
+      "get" : {
+        "tags" : [ "/documents" ],
+        "description" : "Get document by ID",
+        "parameters" : [ {
+          "name" : "id",
+          "description" : "ID of the document",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Document was found in the database",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DocumentData"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Document was not found",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "/documents" ],
+        "summary" : "Update document data",
+        "description" : "Supply at least one valid property in the request body, or it will be invalid",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "ID of the document",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "Document data to update",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "title" : {
+                    "type" : "string"
+                  },
+                  "body" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Document's data was successfuly updated",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DocumentData"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request body (at least one valid property is required in request body).",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Document was not found",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "/documents" ],
+        "summary" : "Delete document with given ID",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "ID of the document",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Document was successfuly deleted",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Document was not found",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/search/users": {
+      "get" : {
+        "tags" : [ "/search" ],
+        "summary" : "Get users matching the query",
+        "description" : "Pass query parameters to define search criteria",
+        "parameters" : [ {
+          "name" : "q",
+          "in" : "query",
+          "description" : "String to match against",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "searchBy",
+          "in" : "query",
+          "description" : "Category to search by. Accepted values are: username, email, fullname. If this query parameter is not supplied, users are searched by username by default",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Query was valid and either some users were found or not (if no users were found, response is a string with info, not an array)",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UsersList"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid query",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/search/documents": {
+      "get" : {
+        "tags" : [ "/search" ],
+        "summary" : "Get documents matching the query",
+        "description" : "Pass query parameters to define a string to match against document titles",
+        "parameters" : [
+          {
+            "name" : "q",
+            "in" : "query",
+            "description" : "String to match against",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "description" : "Query was valid and either some documents were found or not (if no documents were found, response is a string with info, not an array)",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DocumentsList"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid query",
+            "content" : {
+              "text" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "UserData" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "fullname" : {
+            "type" : "string"
+          },
+          "username" : {
+            "type" : "string"
+          }
+        }
+      },
+      "UsersList" : {
+        "type" : "array",
+        "items" : {
+          "$ref" : "#/components/schemas/UserData"
+        }
+      },
+      "DocumentData" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer"
+          },
+          "author_id" : {
+            "type" : "integer"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "body" : {
+            "type" : "string"
+          }
+        }
+      },
+      "DocumentsList" : {
+        "type" : "array",
+        "items" : {
+          "$ref" : "#/components/schemas/DocumentData"
+        }
+      },
+      "Error" : {
+        "type" : "string"
+      }
+    }
+  }
+}

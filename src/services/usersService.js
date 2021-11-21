@@ -1,5 +1,6 @@
+import { Bcrypt } from '../lib';
 import { errorHandlers } from '../middleware';
-import { UserProfiles, UserLogins } from '../models';
+import { UserProfiles, UserLogins, Documents } from '../models';
 
 const { generic } = errorHandlers;
 
@@ -9,47 +10,37 @@ class UsersService {
   constructor() {
     this.userProfiles = new UserProfiles();
     this.userLogins = new UserLogins();
+    this.documents = new Documents();
   }
 
   /** Helper method. Finds a user matching given conditions
    * @param {Object} req - request object
    * @param {Object} res - response object
    * @param {Function} next - passes errors to next Express middleware
-   * @param {Object} conditions to match. Accepted conditions: email, username, profileId
+   * @param {Object} conditions conditions to match
+   * @param {Number} limit (optional) limits number of results
+   * @param {Number} offset (optional) offsets the results
    * @returns {Object} - if user is found, user's data is returned. If not, null is returned
    */
-  findUser = async (req, res, next, conditions) => {
-    const { email, username, profileId } = conditions;
-    if (!username && !email && !profileId) {
-      return null;
-    }
-    let userProfile = null;
-    let userLogin = null;
+  findUsers = async (
+    req,
+    res,
+    next,
+    conditions,
+    limit = Number.MAX_SAFE_INTEGER,
+    offset = 0
+  ) => {
     try {
-      if (email) {
-        userProfile = await this.userProfiles.read({ email });
-        if (userProfile.length === 0 || (userProfile.length === 1 && userProfile[0].deleted_at)) {
-          return null;
-        }
-        userLogin = await this.userLogins.read({ user_profile_id: userProfile[0].id });
+      const users = await this.userProfiles.readWithLogins(
+        conditions,
+        null,
+        limit,
+        offset
+      );
+      if (users.length === 0) {
+        return null;
       }
-      if (profileId) {
-        userProfile = await this.userProfiles.read({ id: profileId });
-        if (userProfile.length === 0 || (userProfile.length === 1 && userProfile[0].deleted_at)) {
-          return null;
-        }
-        userLogin = await this.userLogins.read({ user_profile_id: userProfile[0].id });
-      }
-      if (username) {
-        userLogin = await this.userLogins.read({ username });
-        if (userLogin.length > 0) {
-          userProfile = await this.userProfiles.read({ id: userLogin[0].user_profile_id });
-          if (userProfile.length === 0 || (userProfile.length === 1 && userProfile[0].deleted_at)) {
-            return null;
-          }
-        }
-      }
-      return { userLogin, userProfile };
+      return users;
     } catch (err) {
       if (res.headersSent) {
         next(err);
@@ -81,17 +72,23 @@ class UsersService {
         return;
       }
       // emails and usernames need to be unique, if they already exist, send 400 Bad Request status
-      const user = await this.findUser(req, res, next, { email, username });
-      if (user !== null) {
+      const users = await this.findUsers(req, res, next, { email, username });
+      if (users !== null) {
         res.status(400).send('Username or email already in use.');
         return;
       }
       // create entry in user_profiles table;
       const userProfile = await this.userProfiles.create({ email, fullname });
+      // hash password
+      const hashedPwd = await Bcrypt.hashPwd(password);
       // create entry in user_logins table
       // eslint-disable-next-line camelcase
       const user_profile_id = userProfile[0].id;
-      const userLogin = await this.userLogins.create({ user_profile_id, username, password });
+      const userLogin = await this.userLogins.create({
+        user_profile_id,
+        username,
+        password: hashedPwd
+      });
       // if user is successfully created, send their email, fullname and id
       const newUser = {
         id: userProfile[0].id,
@@ -123,19 +120,76 @@ class UsersService {
         return;
       }
       // if user doesn't exist, send 404
-      const user = await this.findUser(req, res, next, { profileId: id });
-      if (user === null) {
+      const users = await this.findUsers(req, res, next, { 'user_profiles.id': id });
+      if (users === null) {
         res.status(404).send('User not found');
         return;
       }
       // else, send 200 with user data
-      const userData = {
-        username: user.userLogin[0].username,
-        email: user.userProfile[0].email,
-        fullname: user.userProfile[0].fullname,
-        id: user.userProfile[0].id
-      };
-      res.status(200).send(userData);
+      const user = users[0];
+      res.status(200).send(user);
+    } catch (err) {
+      if (res.headersSent) {
+        next(err);
+      } else {
+        generic(err, req, res);
+      }
+    }
+  }
+
+  /** fetches all users from the database (or some, if limit and offset are provided)
+   * @param {Object} req - request object, expected properties: route.limit, route.offset
+   * @param {Object} res - response object
+   * @param {Function} next - passes errors to next Express middleware
+   * @returns {undefined}.
+   */
+  fetchUsers = async (req, res, next) => {
+    try {
+      // retrieve parameters from query and validate them
+      let { limit, offset } = req.query;
+      if (limit) {
+        limit = Number.parseInt(limit, 10);
+        // eslint-disable-next-line no-unused-expressions
+        Number.isInteger(limit) ? null : limit = undefined;
+      }
+      if (offset) {
+        offset = Number.parseInt(offset, 10);
+        // eslint-disable-next-line no-unused-expressions
+        Number.isInteger(offset) ? null : offset = undefined;
+      }
+      // fetch only users that weren't deleted
+      const users = await this.findUsers(req, res, next, {}, limit, offset);
+      // if no documents are found, send 404
+      if (users === null) {
+        res.status(404).send('No users were found');
+        return;
+      }
+      // else, send 200 and users
+      res.status(200).send(users);
+    } catch (err) {
+      if (res.headersSent) {
+        next(err);
+      } else {
+        generic(err, req, res);
+      }
+    }
+  }
+
+  /** fetches all documents created by given user
+   * @param {Object} req - request object, expected properties: params.id
+   * @param {Object} res - response object
+   * @param {Function} next - passes errors to next Express middleware
+   * @returns {undefined}
+   */
+  fetchUsersDocuments = async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const docs = await this.documents.read({ author_id: id });
+      if (docs.length === 0) {
+        res.status(404).send(`No documents were found for user with ID ${id}. If the ID is valid, that means this user created no documents.`);
+        return;
+      }
+      res.status(200).send(docs);
     } catch (err) {
       if (res.headersSent) {
         next(err);
@@ -169,25 +223,28 @@ class UsersService {
         res.status(400).send('You have to supply an ID of the user to update.');
         return;
       }
-      const user = await this.findUser(req, res, next, { profileId: id });
-      if (user === null) {
+      const users = await this.findUsers(req, res, next, { 'user_profiles.id': id });
+      if (users === null) {
         res.status(404).send('User not found');
         return;
       }
-      let { userProfile, userLogin } = user;
-      if (email || fullname) {
-        userProfile = await this.userProfiles.update({ id }, { email, fullname });
-      }
+      let user = users[0];
       if (username || password) {
-        userLogin = await this.userLogins.update({ user_profile_id: id }, { username, password });
+        // eslint-disable-next-line max-len
+        const userLogin = await this.userLogins.update({ user_profile_id: id }, { username, password });
+        user = {
+          ...user,
+          ...userLogin[0]
+        };
       }
-      const userData = {
-        username: userLogin[0].username,
-        email: userProfile[0].email,
-        fullname: userProfile[0].fullname,
-        id: userProfile[0].id
-      };
-      res.status(200).send(userData);
+      if (email || fullname) {
+        const userProfile = await this.userProfiles.update({ id }, { email, fullname });
+        user = {
+          ...user,
+          ...userProfile[0]
+        };
+      }
+      res.status(200).send(user);
     } catch (err) {
       if (res.headersSent) {
         next(err);
@@ -208,8 +265,8 @@ class UsersService {
     const { id } = req.params;
     try {
       // if user doesn't exist, send 400 Bad Request status
-      const user = await this.findUser(req, res, next, { profileId: id });
-      if (user === null) {
+      const users = await this.findUsers(req, res, next, { id });
+      if (users === null) {
         res.status(404).send('User not found');
         return;
       }

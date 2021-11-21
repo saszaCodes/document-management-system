@@ -6,6 +6,7 @@ class UserLogins extends CRUD {
   /** calls parent class constructor, which sets this.table */
   constructor() {
     super('user_logins');
+    this.returnColumns = ['username'];
   }
 
   /** creates new entry in the database
@@ -14,15 +15,21 @@ class UserLogins extends CRUD {
    */
   create(data) {
     return db(this.table)
-      .insert(data, ['id', 'username', 'user_profile_id', 'last_login']);
+      .insert(data, this.returnColumns);
   }
 
   /** reads existing entry from the database
    * @param {Object} conditions restricting the results
+   * @param {Number} limit (optional) limits number of results
+   * @param {Number} offset (optional) offsets results
    * @returns {Promise} representing read operation
    */
-  read(conditions) {
-    return db(this.table).where(conditions);
+  read(conditions, limit, offset) {
+    return db(this.table)
+      .select(...this.returnColumns)
+      .where(conditions)
+      .limit(limit)
+      .offset(offset);
   }
 
   /** udpates entry in the database
@@ -33,7 +40,7 @@ class UserLogins extends CRUD {
   update(conditions, data) {
     return db(this.table)
       .where(conditions)
-      .update(data, ['id', 'username', 'user_profile_id', 'last_login']);
+      .update(data, this.returnColumns);
   }
 }
 
